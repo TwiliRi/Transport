@@ -23,11 +23,13 @@ export default function Load(){
                         <p>Маршрут</p>
                         <div className="flex gap-2 justify-between">
                             <input 
+                            required
                             onChange={(e) => {
                                 e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
                             }}
                             className="w-full px-3 py-2 bg-[#D9D9D9]" type="text" placeholder="Откуда"/>
                             <input
+                            required
                             onChange={(e) => {
                                 e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
                             }}
@@ -35,7 +37,7 @@ export default function Load(){
                         </div>
                     </div>
                 </div>
-                <div className="flex gap-4 justify-between">
+                <div className="flex gap-4 justify-between max-[660px]:flex-col">
                     <div>
                         <p>Вес.т</p>
                         <div className="flex gap-2">
@@ -46,8 +48,10 @@ export default function Load(){
                                     e.target.value = '';
                                 }
                             }}
+                            required
                             type='number' className="w-full px-3 py-2 bg-[#D9D9D9]" placeholder="1" />
                             <input 
+                            required
                             onChange={(e) => {
                                 const value = parseFloat(e.target.value);
                                 if (value < 0 || value > 100 || isNaN(value)) {
@@ -59,10 +63,10 @@ export default function Load(){
                     </div>
                     <div>
                         <p>Макс. габарит, м</p>
-                        <input className="w-full px-3 py-2 bg-[#D9D9D9]" type="text" placeholder="3" />
+                        <input  required className="w-full px-3 py-2 bg-[#D9D9D9]" type="text" placeholder="3" />
                     </div>
                 </div>
-                <div className="flex gap-4 justify-between">
+                <div className="flex gap-4 justify-between max-[660px]:flex-col">
                     <div>
                         <p>Объём м3</p>
                         <div className="flex gap-2">
@@ -154,8 +158,10 @@ export default function Load(){
                             onChange={(e) => {
                                 e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
                             }}
+                            required
                             className="w-full px-3 py-2 bg-[#D9D9D9]" type="text" placeholder="Откуда"/>
                             <input
+                            required
                             onChange={(e) => {
                                 e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
                             }}
@@ -168,6 +174,7 @@ export default function Load(){
                         <p>Вес.т</p>
                         <div className="flex gap-2">
                             <input 
+                            required
                             onChange={(e) => {
                                 const value = parseFloat(e.target.value);
                                 if (value < 0 || value > 100 || isNaN(value)) {
@@ -181,7 +188,7 @@ export default function Load(){
                     <div>
                         <p>Макс. габарит, м</p>
                         <input
-                        
+                        required
                         onChange={(e) => {
                             const value = parseFloat(e.target.value);
                             if (value < 0 || value > 100 || isNaN(value)) {
@@ -226,7 +233,7 @@ export default function Load(){
                 </div>
                 <div className="w-full">
                         <p>Комментарий</p>
-                        <input placeholder="Эйфелевая башня" className="w-full px-3 py-2 bg-[#D9D9D9]" type="text" id="start-date" name="start-date"/>
+                        <input required placeholder="Эйфелевая башня" className="w-full px-3 py-2 bg-[#D9D9D9]" type="text" id="start-date" name="start-date"/>
                 </div>
                 <div className="w-full">
                 <p>Файл</p>

@@ -7,7 +7,7 @@ import Vk from "../../public/vk.png";
 export default function Footer() {
   return (
     <footer className="bg-special-gray grid">
-      <div className="flex pb-2 pt-8 px-5 justify-between">
+      <div className="flex pb-2 pt-8 px-5 justify-between max-[660px]:flex-col max-[660px]:gap-5">
         <div className="flex gap-8 flex-col items-center text-white w-full">
           <Image 
             src={Icon} 
@@ -23,7 +23,7 @@ export default function Footer() {
             <li><Link href="/registration">Регистрация</Link></li>
           </ul>
         </div>
-        <div className="w-1 h-32 rounded-xl bg-white"></div>
+        <div className="w-1 h-32 rounded-xl bg-white max-[660px]:hidden"></div>
         <div className="flex flex-col gap-1 text-white items-center w-full">
           <p className="font-medium">Связаться с нами</p>
           <p>+ 7 910 572 11 19</p>

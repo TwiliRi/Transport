@@ -17,7 +17,7 @@ export default function Nav({ session }: NavProps) {
   
   return (
     <header>
-      <div className="flex justify-between px-3 py-2 items-center">
+      <div className="flex justify-between px-3 py-2 items-center max-[660px]:flex-col-reverse gap-4">
         <Link href="/"><Image src={Icon} className="max-w-16" alt="иконка" /></Link>
         <nav>
           <ul className="text-base flex gap-6 font-light">

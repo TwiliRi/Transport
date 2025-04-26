@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 export default function Search(){
+
     const pathname = usePathname();
     const scrollTo = (distance:number) => {
         window.scrollBy({
@@ -17,6 +18,48 @@ export default function Search(){
             path == pathname ? "opacity-50" : "border-transparent hover:font-normal";
 
 
+    function Gazel(){
+        return(
+        <div className="w-full max-w-[1366px] mx-auto max-[660px]:flex-col max-[660px]:items-center justify-between border rounded-lg shadow-md flex p-4 space-x-4 ">
+            <div className="flex-shrink-0">
+                <Image src={Car} alt="Газель next" className="rounded-lg w-48 h-48 object-cover"/>
+                    
+                <div className="text-sm text-gray-500 mt-2">Дата создания: 19.12.2024</div>
+            </div>
+            <div className="flex-grow">
+                <h2 className="text-lg font-bold">Газель next в поисках работы</h2>
+                <div className="flex  max-[940px]:grid max-[940px]:grid-cols-2 gap-3 max-[678px]:grid-cols-1">
+                    <p className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-xl ">Лёгковые и микроавтобусы</p>
+                    <p className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-xl ">Цена договорная</p>
+                    <p className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-xl ">Минимум 2ч.</p>
+                </div>
+                <div className="mt-4">
+                <div className="flex text-sm text-gray-800">
+                    <div className="w-48">Грузоподъёмность, т</div>
+                    <div>- 2,5</div>
+                </div>
+                <div className="flex text-sm text-gray-800">
+                    <div className="w-48">Длина платформы, м</div>
+                    <div>- 6</div>
+                </div>
+                <div className="flex text-sm text-gray-800">
+                    <div className="w-48">Ширина платформы, м</div>
+                    <div>- 2,3</div>
+                </div>
+                <div className="text-sm text-gray-500 mt-2">Перевозка грузов на газели</div>
+                </div>
+            </div>
+            <div className="max-[660px]:gap-7  flex flex-col justify-between items-end max-[660px]:w-full max-[660px]:items-center max-w-[400px] max-[660px]:text-center">
+                <div className="text-gray-500 text-sm">С 19.12.2024 - По 22.12.2024</div>
+                <div className="flex flex-col space-y-2 max-[660px]:items-center justify-center max-[660px]:w-full">
+                <button className="bg-black text-white w-full px-4 py-2 rounded hover:bg-gray-800">Связаться</button>
+                <button className="bg-gray-200 text-gray-800 w-full px-4 py-2 rounded hover:bg-gray-300">Подробнее</button>
+                </div>
+                <div className="text-sm text-gray-500 mt-2">Рязань, Рязанская обл.</div>
+            </div>
+        </div>
+        )
+    }
     function Forma1(){
         return(
             <>
@@ -228,123 +271,11 @@ export default function Search(){
             <h2 className="my-4">По результату поиска было найдено: 3 заказов</h2>
             
 
-        <div className='flex flex-col gap-5 w-full'>
-        <div className="w-full max-w-[1366px] mx-auto justify-between border rounded-lg shadow-md flex p-4 space-x-4 ">
-            <div className="flex-shrink-0">
-                <Image src={Car} alt="Газель next" className="rounded-lg w-48 h-48 object-cover"/>
-                    
-                <div className="text-sm text-gray-500 mt-2">Дата создания: 19.12.2024</div>
-            </div>
-            <div className="flex-grow">
-                <h2 className="text-lg font-bold">Газель next в поисках работы</h2>
-                <div className="flex  max-[940px]:grid max-[940px]:grid-cols-2 gap-3 max-[678px]:grid-cols-1">
-                    <p className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-xl ">Лёгковые и микроавтобусы</p>
-                    <p className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-xl ">Цена договорная</p>
-                    <p className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-xl ">Минимум 2ч.</p>
-                </div>
-                <div className="mt-4">
-                <div className="flex text-sm text-gray-800">
-                    <div className="w-48">Грузоподъёмность, т</div>
-                    <div>- 2,5</div>
-                </div>
-                <div className="flex text-sm text-gray-800">
-                    <div className="w-48">Длина платформы, м</div>
-                    <div>- 6</div>
-                </div>
-                <div className="flex text-sm text-gray-800">
-                    <div className="w-48">Ширина платформы, м</div>
-                    <div>- 2,3</div>
-                </div>
-                <div className="text-sm text-gray-500 mt-2">Перевозка грузов на газели</div>
-                </div>
-            </div>
-            <div className="flex flex-col justify-between items-end">
-                <div className="text-gray-500 text-sm">С 19.12.2024 - По 22.12.2024</div>
-                <div className="flex flex-col space-y-2">
-                <button className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">Связаться</button>
-                <button className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">Подробнее</button>
-                </div>
-                <div className="text-sm text-gray-500 mt-2">Рязань, Рязанская обл.</div>
-            </div>
-            </div>
-        <div className="w-full max-w-[1366px] mx-auto border rounded-lg shadow-md flex p-4 space-x-4 ">
-            <div className="flex-shrink-0">
-                <Image src={Car} alt="Газель next" className="rounded-lg w-48 h-48 object-cover"/>
-                    
-                <div className="text-sm text-gray-500 mt-2">Дата создания: 19.12.2024</div>
-            </div>
-            <div className="flex-grow">
-                <h2 className="text-lg font-bold">Газель next в поисках работы</h2>
-                <div className="flex  max-[940px]:grid max-[940px]:grid-cols-2 gap-3 max-[678px]:grid-cols-1">
-                    <p className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-xl ">Лёгковые и микроавтобусы</p>
-                    <p className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-xl ">Цена договорная</p>
-                    <p className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-xl ">Минимум 2ч.</p>
-                </div>
-                <div className="mt-4">
-                <div className="flex text-sm text-gray-800">
-                    <div className="w-48">Грузоподъёмность, т</div>
-                    <div>- 2,5</div>
-                </div>
-                <div className="flex text-sm text-gray-800">
-                    <div className="w-48">Длина платформы, м</div>
-                    <div>- 6</div>
-                </div>
-                <div className="flex text-sm text-gray-800">
-                    <div className="w-48">Ширина платформы, м</div>
-                    <div>- 2,3</div>
-                </div>
-                <div className="text-sm text-gray-500 mt-2">Перевозка грузов на газели</div>
-                </div>
-            </div>
-            <div className="flex flex-col justify-between items-end">
-                <div className="text-gray-500 text-sm">С 19.12.2024 - По 22.12.2024</div>
-                <div className="flex flex-col space-y-2">
-                <button className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">Связаться</button>
-                <button className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">Подробнее</button>
-                </div>
-                <div className="text-sm text-gray-500 mt-2">Рязань, Рязанская обл.</div>
-            </div>
-            </div>
-        <div className="w-full max-w-[1366px] mx-auto border rounded-lg shadow-md flex p-4 space-x-4 ">
-            <div className="flex-shrink-0">
-                <Image src={Car} alt="Газель next" className="rounded-lg w-48 h-48 object-cover"/>
-                    
-                <div className="text-sm text-gray-500 mt-2">Дата создания: 19.12.2024</div>
-            </div>
-            <div className="flex-grow">
-                <h2 className="text-lg font-bold">Газель next в поисках работы</h2>
-                <div className="flex  max-[940px]:grid max-[940px]:grid-cols-2 gap-3 max-[678px]:grid-cols-1">
-                    <p className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-xl ">Лёгковые и микроавтобусы</p>
-                    <p className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-xl ">Цена договорная</p>
-                    <p className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-xl ">Минимум 2ч.</p>
-                </div>
-                <div className="mt-4">
-                <div className="flex text-sm text-gray-800">
-                    <div className="w-48">Грузоподъёмность, т</div>
-                    <div>- 2,5</div>
-                </div>
-                <div className="flex text-sm text-gray-800">
-                    <div className="w-48">Длина платформы, м</div>
-                    <div>- 6</div>
-                </div>
-                <div className="flex text-sm text-gray-800">
-                    <div className="w-48">Ширина платформы, м</div>
-                    <div>- 2,3</div>
-                </div>
-                <div className="text-sm text-gray-500 mt-2">Перевозка грузов на газели</div>
-                </div>
-            </div>
-            <div className="flex flex-col justify-between items-end">
-                <div className="text-gray-500 text-sm">С 19.12.2024 - По 22.12.2024</div>
-                <div className="flex flex-col space-y-2">
-                <button className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">Связаться</button>
-                <button className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">Подробнее</button>
-                </div>
-                <div className="text-sm text-gray-500 mt-2">Рязань, Рязанская обл.</div>
-            </div>
-            </div>
+            <div className='flex flex-col gap-5 w-full'>
 
-
+            <Gazel/>
+            <Gazel/>
+            <Gazel/>
 
             </div>
         </div>
