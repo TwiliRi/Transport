@@ -1,487 +1,275 @@
-"use client"
+"use client";
+
 import { useState } from "react";
-import { usePathname } from "next/navigation";
-export default function Load(){
-    const pathname = usePathname();
-    const scrollTo = (distance:number) => {
-        window.scrollBy({
-          top: distance,
-          left: 0,
-          behavior: 'smooth',
-        });
-      };
+import { FaTruck, FaBox, FaMapMarkerAlt, FaCalendar, FaMoneyBillWave, FaSearch } from "react-icons/fa";
 
-    const [currentPage, setCurrentPage] = useState("load");
-    const active = (path: string) =>
-        path == pathname ? "opacity-50" : "border-transparent hover:font-normal";
-    function Forma(){
-        return(
-            <>
-            <form className="flex flex-col gap-3">
-                <div className="flex-col lex ">
-                    <div>
-                        <p>Маршрут</p>
-                        <div className="flex gap-2 justify-between">
-                            <input 
-                            required
-                            onChange={(e) => {
-                                e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
-                            }}
-                            className="w-full px-3 py-2 bg-[#D9D9D9]" type="text" placeholder="Откуда"/>
-                            <input
-                            required
-                            onChange={(e) => {
-                                e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
-                            }}
-                            className="w-full px-3 py-2 bg-[#D9D9D9]" type="text" placeholder="Куда"/>
-                        </div>
-                    </div>
-                </div>
-                <div className="flex gap-4 justify-between max-[660px]:flex-col">
-                    <div>
-                        <p>Вес.т</p>
-                        <div className="flex gap-2">
-                            <input 
-                            onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                if (value < 0 || value > 100 || isNaN(value)) {
-                                    e.target.value = '';
-                                }
-                            }}
-                            required
-                            type='number' className="w-full px-3 py-2 bg-[#D9D9D9]" placeholder="1" />
-                            <input 
-                            required
-                            onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                if (value < 0 || value > 100 || isNaN(value)) {
-                                    e.target.value = '';
-                                }
-                            }}
-                            type='number' className="w-full px-3 py-2 bg-[#D9D9D9]" placeholder="1.5" />
-                        </div>
-                    </div>
-                    <div>
-                        <p>Макс. габарит, м</p>
-                        <input  required className="w-full px-3 py-2 bg-[#D9D9D9]" type="text" placeholder="3" />
-                    </div>
-                </div>
-                <div className="flex gap-4 justify-between max-[660px]:flex-col">
-                    <div>
-                        <p>Объём м3</p>
-                        <div className="flex gap-2">
-                            <input 
-                             onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                if (value < 0 || value > 100 || isNaN(value)) {
-                                    e.target.value = '';
-                                }
-                            }}
-                            type='number'
-                            className="w-full px-3 py-2 bg-[#D9D9D9]" placeholder="11" />
-                            <input 
-                             onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                if (value < 0 || value > 100 || isNaN(value)) {
-                                    e.target.value = '';
-                                }
-                            }}
-                            type='number'
-                            className="w-full px-3 py-2 bg-[#D9D9D9]" placeholder="25" />
-                        </div>
-                    </div>
-                    <div>
-                        <p>Длина маршрута, км</p>
-                        <div className="flex gap-2">
-                            <input
-                             onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                if (value < 0 || value > 3000 || isNaN(value)) {
-                                    e.target.value = '';
-                                }
-                            }}
-                            type='number'
-                            className="w-full px-3 py-2 bg-[#D9D9D9]" placeholder="1000" />
-                            <input
-                             onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                if (value < 0 || value > 3000 || isNaN(value)) {
-                                    e.target.value = '';
-                                }
-                            }}
-                            type='number'
-                            className="w-full px-3 py-2 bg-[#D9D9D9]" placeholder="1011" />
-                        </div>
-                    </div>
-                </div>
-                <div className="flex gap-4 justify-between">
-                    <div className="w-full">
-                        <p>Вид транспорта</p>
-                        <select defaultValue={'all'} className="w-full px-3 py-2 bg-[#D9D9D9]">
-                            <option value="all" >Все виды </option>
-                            <option value="truck">Грузовик</option>
-                            <option value="truck_with_trailer">Фура</option>
-                            <option value="car">Автомобиль</option>
-                        </select>
-                    </div>
-                    <div className="w-full">
-                        <p>Дата</p>
-                        <input className="w-full px-3 py-2 bg-[#D9D9D9]" type="date" id="start-date" name="start-date"/>
-                    </div>
-                </div>
-                <div className="flex justify-center gap-5">
-                    <button type="reset" 
-                    className="px-4 py-2 border-4 border-[#D9D9D9] bg-white text-black shadow-md hover:bg-gray-200">
-                        <p>Сбросить</p>
-                    </button>
-                    <button 
-                    type="submit"
-                    className="px-4 py-2  bg-[#D9D9D9] text-black shadow-md hover:bg-gray-100">
-                        <p>Подтвердить</p>
-                    </button>
-                </div>
-                
-            </form>
-            </>
-        )
-    }
+export default function Load() {
+  const [currentPage, setCurrentPage] = useState("load");
 
-    function Forma2(){
-        return(
-            <>
-            <form className="flex flex-col gap-3">
-                <div className="flex-col lex ">
-                    <div>
-                        <p>Маршрут</p>
-                        <div className="flex gap-2 justify-between">
-                            <input 
-                            onChange={(e) => {
-                                e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
-                            }}
-                            required
-                            className="w-full px-3 py-2 bg-[#D9D9D9]" type="text" placeholder="Откуда"/>
-                            <input
-                            required
-                            onChange={(e) => {
-                                e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
-                            }}
-                            className="w-full px-3 py-2 bg-[#D9D9D9]" type="text" placeholder="Куда"/>
-                        </div>
-                    </div>
-                </div>
-                <div className="flex gap-4 justify-between">
-                    <div>
-                        <p>Вес.т</p>
-                        <div className="flex gap-2">
-                            <input 
-                            required
-                            onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                if (value < 0 || value > 100 || isNaN(value)) {
-                                    e.target.value = '';
-                                }
-                            }}
-                            type='number' className="w-full px-3 py-2 bg-[#D9D9D9]" placeholder="1" />
-                            
-                        </div>
-                    </div>
-                    <div>
-                        <p>Макс. габарит, м</p>
-                        <input
-                        required
-                        onChange={(e) => {
-                            const value = parseFloat(e.target.value);
-                            if (value < 0 || value > 100 || isNaN(value)) {
-                                e.target.value = '';
-                            }
-                        }}
-                        className="w-full px-3 py-2 bg-[#D9D9D9]" type="text" placeholder="3" />
-                    </div>
-                </div>
-                <div className="flex gap-4 justify-between">
-                    <div>
-                        <p>Объём м3</p>
-                        <div className="flex gap-2">
-                            <input 
-                             onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                if (value < 0 || value > 100 || isNaN(value)) {
-                                    e.target.value = '';
-                                }
-                            }}
-                            type='number'
-                            className="w-full px-3 py-2 bg-[#D9D9D9]" placeholder="11" />
-                           
-                        </div>
-                    </div>
-                    
-                </div>
-                <div className="flex gap-4 justify-between">
-                    <div className="w-full">
-                        <p>Вид транспорта</p>
-                        <select defaultValue={'all'} className="w-full px-3 py-2 bg-[#D9D9D9]">
-                            <option value="all" >Все виды </option>
-                            <option value="truck">Грузовик</option>
-                            <option value="truck_with_trailer">Фура</option>
-                            <option value="car">Автомобиль</option>
-                        </select>
-                    </div>
-                    <div className="w-full">
-                        <p>Дата</p>
-                        <input className="w-full px-3 py-2 bg-[#D9D9D9]" type="date" id="start-date" name="start-date"/>
-                    </div>
-                </div>
-                <div className="w-full">
-                        <p>Комментарий</p>
-                        <input required placeholder="Эйфелевая башня" className="w-full px-3 py-2 bg-[#D9D9D9]" type="text" id="start-date" name="start-date"/>
-                </div>
-                <div className="w-full">
-                <p>Файл</p>
-                <input
-                    className="w-full px-3 py-2 bg-[#D9D9D9] border-black border-2"
-                    type="file"
-                    id="start-date"
-                    name="start-date"
-                    accept="image/jpeg,image/png"
-                />
-                </div>
-
-
-
-                <div className="flex justify-center gap-5">
-                    <button type="reset" 
-                    className="px-4 py-2 border-4 border-[#D9D9D9] bg-white text-black shadow-md hover:bg-gray-200">
-                        <p>Сбросить</p>
-                    </button>
-                    <button 
-                    type="submit"
-                    className="px-4 py-2  bg-[#D9D9D9] text-black shadow-md hover:bg-gray-100">
-                        <p>Подтвердить</p>
-                    </button>
-                </div>
-                
-            </form>
-            </>
-        )
-    }
-    return(
-        <>
-        <div className="flex flex-col  justify-center items-center p-5">
-            <h1 className="text-center font-normal text-xl">Найти груз для перевозки</h1>
-
-            <section className="flex max-w-[1366px]  gap-4 items-center max-[768px]:flex-col-reverse">
-            {currentPage=='load'?<Forma/>:<Forma2/>}
-            
-            <div className="w-1 h-[300px] max-[768px]:h-1 max-[768px]:w-[300px] bg-[#D9D9D9]"></div>
-            <div className="flex flex-col justify-center gap-3 p-5 items-center ">
-           
-                <button
-                className={`px-4 py-2  bg-[#D9D9D9] text-black shadow-md w-[245px] hover:bg-gray-100 ${active("load")}`}
-                 onClick={()=>setCurrentPage("load")}
-                >Найти груз для перевозки</button>
-                <button
-                className={`px-4 py-2  bg-[#D9D9D9] text-black shadow-md w-[245px] hover:bg-gray-100 ${active("upload")}`}
-                 onClick={()=>setCurrentPage("upload")}
-                >Создать груз для перевозки</button>
-            </div>
-         </section>
-
-            <div 
-            onClick={()=>scrollTo(800)}
-            className="w-64 h-1 my-3 bg-black mt-6 rounded-md">
-        
-            </div>
-
-            <h2 className="my-4">По результату поиска было найдено: 5 заказов</h2>
-            <div className="flex flex-col gap-4 w-full">
-            <div className="w-full flex justify-center">
-                <div className="w-full max-w-[1366px] border rounded-lg p-4 flex justify-between items-center shadow-md max-[786px]:grid max-[786px]:justify-center max-[786px]:w-auto max-[786px]:gap-3 ">
-                    <div>
-                        <div className="text-lg font-bold text-center">Маршрут</div>
-                        <div className="flex items-center space-x-2">
-                        <div>
-                            <div className="font-semibold">Москва</div>
-                            <div className="text-sm text-gray-500">Московская обл.</div>
-                        </div>
-                        <div className="text-xl">→</div>
-                        <div>
-                            <div className="font-semibold">Рязань</div>
-                            <div className="text-sm text-gray-500">Рязанская обл.</div>
-                        </div>
-                        </div>
-                    </div>
-                    <div className="w-1 rounded-xl h-full bg-[#D9D9D9]"></div>
-                    <div className="text-center">
-                        <div className="text-gray-500 text-sm">Дата отправки</div>
-                        <div className="text-lg font-semibold">19.12.2024</div>
-                        <div className="text-sm text-green-600">Сегодня</div>
-                    </div>
-                    <div className="w-1 rounded-xl h-full bg-[#D9D9D9]"></div>
-                    <div>
-                        <div className="text-gray-500 text-sm">О заказе</div>
-                        <div className="text-lg font-semibold">1.5т, 30м²</div>
-                        <div className="text-sm text-gray-500">Старый диван</div>
-                        <div className="text-lg font-bold text-gray-800">15,000 руб</div>
-                    </div>
-                    <div className="w-1 rounded-xl h-full bg-[#D9D9D9]"></div>
-                    <div className="flex flex-col space-y-2">
-                        <button className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">Подробнее</button>
-                        <button className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">Откликнуться</button>
-                    </div>
-                    </div>
-
-            </div>
-            <div className="w-full flex justify-center">
-                <div className="w-full max-w-[1366px] border rounded-lg p-4 flex justify-between items-center shadow-md max-[786px]:grid max-[786px]:justify-center max-[786px]:w-auto max-[786px]:gap-3 ">
-                    <div>
-                        <div className="text-lg font-bold text-center">Маршрут</div>
-                        <div className="flex items-center space-x-2">
-                        <div>
-                            <div className="font-semibold">Москва</div>
-                            <div className="text-sm text-gray-500">Московская обл.</div>
-                        </div>
-                        <div className="text-xl">→</div>
-                        <div>
-                            <div className="font-semibold">Рязань</div>
-                            <div className="text-sm text-gray-500">Рязанская обл.</div>
-                        </div>
-                        </div>
-                    </div>
-                    <div className="w-1 rounded-xl h-full bg-[#D9D9D9]"></div>
-                    <div className="text-center">
-                        <div className="text-gray-500 text-sm">Дата отправки</div>
-                        <div className="text-lg font-semibold">19.12.2024</div>
-                        <div className="text-sm text-green-600">Сегодня</div>
-                    </div>
-                    <div className="w-1 rounded-xl h-full bg-[#D9D9D9]"></div>
-                    <div>
-                        <div className="text-gray-500 text-sm">О заказе</div>
-                        <div className="text-lg font-semibold">1.5т, 30м²</div>
-                        <div className="text-sm text-gray-500">Старый диван</div>
-                        <div className="text-lg font-bold text-gray-800">15,000 руб</div>
-                    </div>
-                    <div className="w-1 rounded-xl h-full bg-[#D9D9D9]"></div>
-                    <div className="flex flex-col space-y-2">
-                        <button className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">Подробнее</button>
-                        <button className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">Откликнуться</button>
-                    </div>
-                    </div>
-
-            </div>
-            <div className="w-full flex justify-center">
-                <div className="w-full max-w-[1366px] border rounded-lg p-4 flex justify-between items-center shadow-md max-[786px]:grid max-[786px]:justify-center max-[786px]:w-auto max-[786px]:gap-3 ">
-                    <div>
-                        <div className="text-lg font-bold text-center">Маршрут</div>
-                        <div className="flex items-center space-x-2">
-                        <div>
-                            <div className="font-semibold">Москва</div>
-                            <div className="text-sm text-gray-500">Московская обл.</div>
-                        </div>
-                        <div className="text-xl">→</div>
-                        <div>
-                            <div className="font-semibold">Рязань</div>
-                            <div className="text-sm text-gray-500">Рязанская обл.</div>
-                        </div>
-                        </div>
-                    </div>
-                    <div className="w-1 rounded-xl h-full bg-[#D9D9D9]"></div>
-                    <div className="text-center">
-                        <div className="text-gray-500 text-sm">Дата отправки</div>
-                        <div className="text-lg font-semibold">19.12.2024</div>
-                        <div className="text-sm text-green-600">Сегодня</div>
-                    </div>
-                    <div className="w-1 rounded-xl h-full bg-[#D9D9D9]"></div>
-                    <div>
-                        <div className="text-gray-500 text-sm">О заказе</div>
-                        <div className="text-lg font-semibold">1.5т, 30м²</div>
-                        <div className="text-sm text-gray-500">Старый диван</div>
-                        <div className="text-lg font-bold text-gray-800">15,000 руб</div>
-                    </div>
-                    <div className="w-1 rounded-xl h-full bg-[#D9D9D9]"></div>
-                    <div className="flex flex-col space-y-2">
-                        <button className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">Подробнее</button>
-                        <button className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">Откликнуться</button>
-                    </div>
-                    </div>
-
-            </div>
-            <div className="w-full flex justify-center">
-                <div className="w-full max-w-[1366px] border rounded-lg p-4 flex justify-between items-center shadow-md max-[786px]:grid max-[786px]:justify-center max-[786px]:w-auto max-[786px]:gap-3 ">
-                    <div>
-                        <div className="text-lg font-bold text-center">Маршрут</div>
-                        <div className="flex items-center space-x-2">
-                        <div>
-                            <div className="font-semibold">Москва</div>
-                            <div className="text-sm text-gray-500">Московская обл.</div>
-                        </div>
-                        <div className="text-xl">→</div>
-                        <div>
-                            <div className="font-semibold">Рязань</div>
-                            <div className="text-sm text-gray-500">Рязанская обл.</div>
-                        </div>
-                        </div>
-                    </div>
-                    <div className="w-1 rounded-xl h-full bg-[#D9D9D9]"></div>
-                    <div className="text-center">
-                        <div className="text-gray-500 text-sm">Дата отправки</div>
-                        <div className="text-lg font-semibold">19.12.2024</div>
-                        <div className="text-sm text-green-600">Сегодня</div>
-                    </div>
-                    <div className="w-1 rounded-xl h-full bg-[#D9D9D9]"></div>
-                    <div>
-                        <div className="text-gray-500 text-sm">О заказе</div>
-                        <div className="text-lg font-semibold">1.5т, 30м²</div>
-                        <div className="text-sm text-gray-500">Старый диван</div>
-                        <div className="text-lg font-bold text-gray-800">15,000 руб</div>
-                    </div>
-                    <div className="w-1 rounded-xl h-full bg-[#D9D9D9]"></div>
-                    <div className="flex flex-col space-y-2">
-                        <button className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">Подробнее</button>
-                        <button className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">Откликнуться</button>
-                    </div>
-                    </div>
-
-            </div>
-            <div className="w-full flex justify-center">
-                <div className="w-full max-w-[1366px] border rounded-lg p-4 flex justify-between items-center shadow-md max-[786px]:grid max-[786px]:justify-center max-[786px]:w-auto max-[786px]:gap-3 ">
-                    <div>
-                        <div className="text-lg font-bold text-center">Маршрут</div>
-                        <div className="flex items-center space-x-2">
-                        <div>
-                            <div className="font-semibold">Москва</div>
-                            <div className="text-sm text-gray-500">Московская обл.</div>
-                        </div>
-                        <div className="text-xl">→</div>
-                        <div>
-                            <div className="font-semibold">Рязань</div>
-                            <div className="text-sm text-gray-500">Рязанская обл.</div>
-                        </div>
-                        </div>
-                    </div>
-                    <div className="w-1 rounded-xl h-full bg-[#D9D9D9]"></div>
-                    <div className="text-center">
-                        <div className="text-gray-500 text-sm">Дата отправки</div>
-                        <div className="text-lg font-semibold">19.12.2024</div>
-                        <div className="text-sm text-green-600">Сегодня</div>
-                    </div>
-                    <div className="w-1 rounded-xl h-full bg-[#D9D9D9]"></div>
-                    <div>
-                        <div className="text-gray-500 text-sm">О заказе</div>
-                        <div className="text-lg font-semibold">1.5т, 30м²</div>
-                        <div className="text-sm text-gray-500">Старый диван</div>
-                        <div className="text-lg font-bold text-gray-800">15,000 руб</div>
-                    </div>
-                    <div className="w-1 rounded-xl h-full bg-[#D9D9D9]"></div>
-                    <div className="flex flex-col space-y-2">
-                        <button className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">Подробнее</button>
-                        <button className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">Откликнуться</button>
-                    </div>
-                    </div>
-
-            </div>
-            </div>
-        
+  return (
+    <div className="max-w-[1366px] mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-center mb-6">Грузоперевозки</h1>
+        <div className="flex justify-center gap-4 mb-8">
+          <button
+            onClick={() => setCurrentPage("load")}
+            className={`flex items-center px-6 py-3 rounded-lg transition-colors ${currentPage === "load" 
+              ? "bg-black text-white" 
+              : "bg-gray-100 hover:bg-gray-200 text-gray-800"}`}
+          >
+            <FaTruck className="mr-2" /> Найти груз
+          </button>
+          <button
+            onClick={() => setCurrentPage("upload")}
+            className={`flex items-center px-6 py-3 rounded-lg transition-colors ${currentPage === "upload" 
+              ? "bg-black text-white" 
+              : "bg-gray-100 hover:bg-gray-200 text-gray-800"}`}
+          >
+            <FaBox className="mr-2" /> Разместить груз
+          </button>
         </div>
-        </>
-    )
+      </div>
+
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        {currentPage === "load" ? <SearchForm /> : <CreateForm />}
+      </div>
+
+      <div className="mt-12">
+        <h2 className="text-2xl font-bold mb-6">Доступные заказы</h2>
+        <div className="space-y-4">
+          <OrderCard />
+          <OrderCard />
+          <OrderCard />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SearchForm() {
+  return (
+    <form className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Маршрут</label>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Откуда"
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
+                onChange={(e) => {
+                  e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
+                }}
+              />
+            </div>
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Куда"
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
+                onChange={(e) => {
+                  e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Вес (тонны)</label>
+          <div className="flex gap-4">
+            <input
+              type="number"
+              placeholder="От"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
+              onChange={(e) => {
+                const value = parseFloat(e.target.value);
+                if (value < 0 || value > 100 || isNaN(value)) {
+                  e.target.value = '';
+                }
+              }}
+            />
+            <input
+              type="number"
+              placeholder="До"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
+              onChange={(e) => {
+                const value = parseFloat(e.target.value);
+                if (value < 0 || value > 100 || isNaN(value)) {
+                  e.target.value = '';
+                }
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Тип транспорта</label>
+          <select className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black">
+            <option value="all">Все виды</option>
+            <option value="truck">Грузовик</option>
+            <option value="truck_with_trailer">Фура</option>
+            <option value="car">Легковой автомобиль</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Дата погрузки</label>
+          <input
+            type="date"
+            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-center gap-4 pt-4">
+        <button
+          type="reset"
+          className="px-6 py-2 rounded-lg border-2 border-gray-200 hover:bg-gray-50 transition-colors"
+        >
+          Сбросить
+        </button>
+        <button
+          type="submit"
+          className="px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors"
+        >
+          <FaSearch className="inline mr-2" />
+          Найти
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function CreateForm() {
+  return (
+    <form className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Маршрут</label>
+          <div className="flex gap-4">
+            <input
+              type="text"
+              placeholder="Откуда"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
+              onChange={(e) => {
+                e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
+              }}
+            />
+            <input
+              type="text"
+              placeholder="Куда"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
+              onChange={(e) => {
+                e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
+              }}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Вес груза (тонны)</label>
+          <input
+            type="number"
+            placeholder="Вес"
+            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              if (value < 0 || value > 100 || isNaN(value)) {
+                e.target.value = '';
+              }
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Описание груза</label>
+          <textarea
+            placeholder="Опишите ваш груз"
+            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
+            rows={3}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Фотографии груза</label>
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-center gap-4 pt-4">
+        <button
+          type="reset"
+          className="px-6 py-2 rounded-lg border-2 border-gray-200 hover:bg-gray-50 transition-colors"
+        >
+          Сбросить
+        </button>
+        <button
+          type="submit"
+          className="px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors"
+        >
+          Разместить заказ
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function OrderCard() {
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-xl font-bold mb-2">Перевозка мебели</h3>
+          <div className="flex items-center text-gray-600">
+            <FaMapMarkerAlt className="mr-2" />
+            <span>Москва → Санкт-Петербург</span>
+          </div>
+        </div>
+        <span className="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
+          Активный
+        </span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 mb-4">
+        <div>
+          <div className="text-sm text-gray-600 mb-1">
+            <FaCalendar className="inline mr-1" /> Дата погрузки
+          </div>
+          <div className="font-medium">20.05.2024</div>
+        </div>
+        <div>
+          <div className="text-sm text-gray-600 mb-1">
+            <FaTruck className="inline mr-1" /> Тип транспорта
+          </div>
+          <div className="font-medium">Грузовик</div>
+        </div>
+        <div>
+          <div className="text-sm text-gray-600 mb-1">
+            <FaMoneyBillWave className="inline mr-1" /> Стоимость
+          </div>
+          <div className="font-medium">15 000 ₽</div>
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-3">
+        <button className="px-4 py-2 text-sm rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+          Подробнее
+        </button>
+        <button className="px-4 py-2 text-sm rounded-lg bg-black text-white hover:bg-gray-800 transition-colors">
+          Откликнуться
+        </button>
+      </div>
+    </div>
+  );
 }

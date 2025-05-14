@@ -5,7 +5,6 @@ import Head from "~/public/head.png";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type Session } from "next-auth";
-import { FaUser } from "react-icons/fa";
 
 interface NavProps {
   session: Session | null;
@@ -22,33 +21,22 @@ export default function Nav({ session }: NavProps) {
         <Link href="/"><Image src={Icon} className="max-w-16" alt="иконка" /></Link>
         <nav>
           <ul className="text-base flex gap-6 font-light">
-            <li><Link className={`border-b-2 ${active("/")}`} href="/">Главная</Link></li>
             <li><Link className={`border-b-2 ${active("/load")}`} href="/load">Грузы</Link></li>
             <li><Link className={`border-b-2 ${active("/search")}`} href="/search">Найти машину</Link></li>
+            <li><Link className={`border-b-2 ${active("/")}`} href="/">Информация</Link></li>
           </ul>
         </nav>
         <div className="flex items-center gap-2">
           <div>{session ? 
-            <Link href={'/profile'}>
-            <div className="flex items-center gap-6">
-              
-                {session.user.name}
-                {session.user.image ? (
-                    <img 
-                      src={session.user.image} 
-                      alt={"иконка пользователя"} 
-                      className=" rounded-full w-10 h-10"
-                    />
-                  ) : (
-                    <FaUser className="text-4xl text-gray-400 w-6 h-6" />
-                  )}
-            </div> 
-            </Link>
 
+            <div className="flex items-center gap-6">
+                {session.user.name}
+              <Image src={Head} alt="иконка" />
+            </div>   
             : 
             <div className="flex gap-4">
               <Link href={'/api/auth/signin'}>Вход</Link>
-              <Link href={'/register'}>Регистрация</Link>
+              <Link href={'/registration'}>Регистрация</Link>
             </div>
             }
             </div>

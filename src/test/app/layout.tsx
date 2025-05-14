@@ -2,7 +2,6 @@ import "~/styles/globals.css";
 import Footer from "./_components/Footer";
 import Nav from "./_components/Nav";
 import { auth } from "~/server/auth";
-import { SessionProvider } from "next-auth/react"; // Добавьте этот импорт
 
 
 import { type Metadata } from "next";
@@ -27,11 +26,9 @@ export default async function RootLayout({
   const session = await auth();
   return (
     <html lang="en" className={`${geist.variable}`}>
-      <body className="grid grid-rows-[auto_1fr_auto] min-h-[100vh]">
+      <body>
         <Nav session={session}/>
-        <SessionProvider session={session}>
-          <TRPCReactProvider>{children}</TRPCReactProvider>
-        </SessionProvider>
+        <TRPCReactProvider>{children}</TRPCReactProvider>
         <Footer />
       </body>
     </html>
