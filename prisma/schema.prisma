@@ -50,6 +50,27 @@ model Session {
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Cargo {
+  id           String   @id @default(cuid())
+  number       String   @unique
+  status       String   @default("active")
+  routeFrom    String
+  routeTo      String
+  departureDate DateTime
+  weightKg     Float
+  price        Float
+  vehicleType  String?
+  cargoType    String?
+  description  String?  
+  imageUrl     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Связь с пользователем
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model User {
     id            String    @id @default(cuid())
     name          String?
@@ -62,6 +83,8 @@ model User {
     accounts      Account[]
     sessions      Session[]
     posts         Post[]
+    cargos       Cargo[]
+    orders      Order[]
 }
 
 model VerificationToken {
@@ -71,3 +94,24 @@ model VerificationToken {
 
     @@unique([identifier, token])
 }
+
+
+model Order {
+  id          String   @id @default(cuid())
+  number      String
+  status      String   // 'active', 'completed', 'cancelled'
+  date        String
+  routeFrom   String
+  routeTo     String
+  price       Float
+  cargoType   String
+  cargoWeight String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Связь с пользователем
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+

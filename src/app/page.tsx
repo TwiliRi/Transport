@@ -22,7 +22,7 @@ export default function Home() {
   
   return (
     <>
-      {/* Герой-секция */}
+      
       <section className="relative bg-gradient-to-b from-gray-50 to-white py-12 md:py-20">
         <div className="max-w-[1366px] mx-auto px-4 sm:px-5 flex flex-col items-center">
           <div className="text-center mb-8 md:mb-12">
@@ -34,42 +34,56 @@ export default function Home() {
           
           <div className="flex justify-center gap-4 sm:gap-8 mb-8 md:mb-12 flex-wrap">
             <Link href="/search?type=cargo" className="group w-full sm:w-auto max-w-[280px]">
-              <div className="bg-white hover:bg-black text-black hover:text-white transition-colors duration-300 shadow-lg rounded-lg p-6 sm:p-8 w-full sm:w-[280px] text-center border border-gray-100 group-hover:border-black">
-                <FaBoxOpen className="text-4xl sm:text-5xl mx-auto mb-3 sm:mb-4 text-black group-hover:text-white transition-colors duration-300" />
+              <div className="bg-white hover:bg-black text-black hover:text-white
+               transition-colors duration-300 shadow-lg rounded-lg p-6 sm:p-8 w-full sm:w-[280px]
+                text-center border border-gray-100 group-hover:border-black">
+                <FaBoxOpen className="text-4xl sm:text-5xl mx-auto mb-3 sm:mb-4 text-black
+                 group-hover:text-white transition-colors duration-300" />
                 <h3 className="text-xl sm:text-2xl font-semibold mb-1 sm:mb-2">Найти грузы</h3>
-                <p className="text-gray-600 group-hover:text-gray-200 transition-colors duration-300">Для перевозчиков</p>
+                <p className="text-gray-600 group-hover:text-gray-200 
+                transition-colors duration-300">Для перевозчиков</p>
               </div>
             </Link>
             
             <Link href="/search?type=transport" className="group w-full sm:w-auto max-w-[280px]">
-              <div className="bg-white hover:bg-black text-black hover:text-white transition-colors duration-300 shadow-lg rounded-lg p-6 sm:p-8 w-full sm:w-[280px] text-center border border-gray-100 group-hover:border-black">
-                <FaTruck className="text-4xl sm:text-5xl mx-auto mb-3 sm:mb-4 text-black group-hover:text-white transition-colors duration-300" />
+              <div className="bg-white hover:bg-black text-black hover:text-white
+               transition-colors duration-300 shadow-lg rounded-lg p-6 sm:p-8 w-full 
+               sm:w-[280px] text-center border border-gray-100 group-hover:border-black">
+                <FaTruck className="text-4xl sm:text-5xl mx-auto mb-3 sm:mb-4 text-black
+                 group-hover:text-white transition-colors duration-300" />
                 <h3 className="text-xl sm:text-2xl font-semibold mb-1 sm:mb-2">Найти машину</h3>
-                <p className="text-gray-600 group-hover:text-gray-200 transition-colors duration-300">Для грузоотправителей</p>
+                <p className="text-gray-600 group-hover:text-gray-200 
+                transition-colors duration-300">Для грузоотправителей</p>
               </div>
             </Link>
           </div>
           
-          <div className="flex flex-col sm:flex-row justify-between items-center w-full max-w-4xl mt-4 sm:mt-8 gap-6 sm:gap-0">
+          <div className="flex flex-col sm:flex-row justify-between items-center w-full
+           max-w-4xl mt-4 sm:mt-8 gap-6 sm:gap-0">
             <div className="w-full sm:w-1/2 flex justify-center">
               <Image 
                 
                 src={Boxes} 
-                className="max-w-full sm:max-w-[90%] md:max-w-[400px] max-h-[200px] sm:max-h-[300px] object-contain transform hover:scale-105 transition-transform duration-300" 
+                className="max-w-full sm:max-w-[90%] md:max-w-[400px] max-h-[200px] 
+                sm:max-h-[300px] object-contain transform hover:scale-105 transition-transform
+                 duration-300" 
                 alt="Грузы" 
               />
             </div>
             <div className="w-full sm:w-1/2 flex justify-center">
               <Image 
                 src={Cars} 
-                className="max-w-full sm:max-w-[90%] md:max-w-[400px] max-h-[200px] sm:max-h-[300px] object-contain transform hover:scale-105 transition-transform duration-300" 
+                className="max-w-full sm:max-w-[90%] md:max-w-[400px] max-h-[200px]
+                 sm:max-h-[300px] object-contain transform hover:scale-105 
+                 transition-transform duration-300" 
                 alt="Транспорт" 
               />
             </div>
           </div>
         </div>
         
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-black to-transparent opacity-20"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r 
+        from-transparent via-black to-transparent opacity-20"></div>
       </section>
       
       {/* О нас */}
@@ -78,32 +92,41 @@ export default function Home() {
           <div className="text-center mb-10 md:mb-16">
             <h2 className="text-2xl sm:text-3xl font-bold mb-3 md:mb-4">О нашей платформе</h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-2 sm:px-0">
-              Мы — динамично развивающаяся компания, специализирующаяся на предоставлении высококачественных услуг в области перевозок.
+              Мы — динамично развивающаяся компания, специализирующаяся на предоставлении
+               высококачественных услуг в области перевозок.
             </p>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mb-12 md:mb-20">
-            <div className="bg-gray-50 rounded-lg p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col items-center text-center">
+            <div className="bg-gray-50 rounded-lg p-6 sm:p-8 shadow-sm hover:shadow-md 
+            transition-shadow duration-300 flex flex-col items-center text-center">
               <FaUserFriends className="text-3xl sm:text-4xl mb-3 sm:mb-4 text-black" />
               <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Индивидуальный подход</h3>
               <p className="text-gray-600">
-                Каждый клиент для нас важен. Мы разрабатываем оптимальные маршруты, учитываем специфику вашего груза и предоставляем персонализированные решения.
+                Каждый клиент для нас важен. Мы разрабатываем оптимальные маршруты,
+                учитываем специфику вашего груза и предоставляем персонализированные решения.
               </p>
             </div>
             
-            <div className="bg-gray-50 rounded-lg p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col items-center text-center">
+            <div className="bg-gray-50 rounded-lg p-6 sm:p-8 shadow-sm hover:shadow-md 
+            transition-shadow duration-300 flex flex-col items-center text-center">
               <FaTruck className="text-3xl sm:text-4xl mb-3 sm:mb-4 text-black" />
-              <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Огромный автопарк</h3>
+              <h3 className="text-lg sm:text-xl font-semibold
+               mb-2 sm:mb-3">Огромный автопарк</h3>
               <p className="text-gray-600">
-                Наш автопарк состоит из современных автомобилей различной грузоподъемности. Это позволяет нам перевозить грузы любых размеров и типов.
+                Наш автопарк состоит из современных автомобилей различной грузоподъемности.
+                 Это позволяет нам перевозить грузы любых размеров и типов.
               </p>
             </div>
             
-            <div className="bg-gray-50 rounded-lg p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col items-center text-center sm:col-span-2 md:col-span-1 sm:max-w-md sm:mx-auto md:max-w-none">
+            <div className="bg-gray-50 rounded-lg p-6 sm:p-8 shadow-sm hover:shadow-md 
+            transition-shadow duration-300 flex flex-col items-center text-center
+             sm:col-span-2 md:col-span-1 sm:max-w-md sm:mx-auto md:max-w-none">
               <FaShieldAlt className="text-3xl sm:text-4xl mb-3 sm:mb-4 text-black" />
               <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Безопасность</h3>
               <p className="text-gray-600">
-                Каждый водитель тщательно следит за техническим состоянием автомобилей, а также соблюдает все нормы и стандарты безопасности.
+                Каждый водитель тщательно следит за техническим состоянием автомобилей,
+                 а также соблюдает все нормы и стандарты безопасности.
               </p>
             </div>
           </div>
@@ -120,12 +143,13 @@ export default function Home() {
             </p>
           </div>
           
-          {/* Индивидуальный подход */}
+          
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 mb-16 md:mb-24">
             <div className="w-full md:w-1/2">
               <h3 className="text-xl sm:text-2xl font-bold mb-3 md:mb-4">Индивидуальный подход</h3>
               <p className="text-base sm:text-lg text-gray-600 mb-4 md:mb-6">
-                Каждый клиент для нас важен. Мы разрабатываем оптимальные маршруты, учитываем специфику вашего груза и предоставляем персонализированные решения.
+                Каждый клиент для нас важен. Мы разрабатываем оптимальные маршруты,
+                 учитываем специфику вашего груза и предоставляем персонализированные решения.
               </p>
               <ul className="space-y-2">
                 <li className="flex items-center">
@@ -143,9 +167,16 @@ export default function Home() {
               </ul>
             </div>
             <div className="w-full md:w-1/2 relative h-[300px] md:h-[400px] mt-6 md:mt-0">
-              <Image src={Individual1} alt="Индивидуальный подход" className="absolute top-0 right-0 w-[60%] md:w-[250px] rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300" />
-              <Image src={Individual2} alt="Индивидуальный подход" className="absolute bottom-0 left-0 w-[60%] md:w-[250px] rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300" />
-              <Image src={Individual3} alt="Индивидуальный подход" className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[60%] md:w-[250px] rounded-lg shadow-lg hover:scale-105 transition-transform duration-300" />
+              <Image src={Individual1} alt="Индивидуальный подход" 
+              className="absolute top-0 right-0 w-[60%] md:w-[250px] rounded-lg
+               shadow-lg transform hover:scale-105 transition-transform duration-300" />
+              <Image src={Individual2} alt="Индивидуальный подход" 
+              className="absolute bottom-0 left-0 w-[60%] md:w-[250px] rounded-lg 
+              shadow-lg transform hover:scale-105 transition-transform duration-300" />
+              <Image src={Individual3} alt="Индивидуальный подход" 
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 
+              -translate-y-1/2 w-[60%] md:w-[250px] rounded-lg shadow-lg 
+              hover:scale-105 transition-transform duration-300" />
             </div>
           </div>
           

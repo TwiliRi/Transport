@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Car from "~/public/car.png";
 import { FaTruck, FaUser, FaMapMarkerAlt, FaCalendar, FaRuler, FaWeight, FaClock, FaCamera } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion"; // Добавляем импорт framer-motion
 
 export default function Search() {
   const [currentPage, setCurrentPage] = useState("search");
@@ -32,10 +33,42 @@ export default function Search() {
         </div>
       </div>
 
-      {currentPage === "search" ? <SearchForm /> : <UploadForm />}
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:p-8 overflow-hidden">
+        <AnimatePresence mode="wait">
+          {currentPage === "search" ? (
+            <motion.div
+              key="search"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <SearchForm />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="upload"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <UploadForm />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       <div className="mt-8 space-y-6">
-        <TruckCard />
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
+            <TruckCard />
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -312,80 +345,64 @@ function UploadForm() {
 
 function TruckCard() {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-md p-4 sm:p-6">
-      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
-        <div className="w-full lg:w-48 flex-shrink-0">
-          <div className="relative aspect-square w-full lg:w-48">
-            <Image 
-              src={Car} 
-              alt="Газель next" 
-              className="rounded-lg object-cover"
-              fill
-              quality={95}
-              priority
-              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 300px"
-            />
-          </div>
-          <div className="text-sm text-gray-500 mt-2 text-center lg:text-left">
-            <FaCalendar className="inline mr-2" />
-            Дата создания: 19.12.2024
-          </div>
-        </div>
-        
-        <div className="flex-grow space-y-4">
-          <h2 className="text-xl font-bold">Газель next в поисках работы</h2>
-          
-          <div className="flex flex-wrap gap-2">
-            <span className="bg-gray-100 text-gray-800 text-sm px-3 py-1 rounded-full inline-flex items-center">
-              <FaTruck className="mr-2" /> Лёгкие и микроавтобусы
-            </span>
-            <span className="bg-gray-100 text-gray-800 text-sm px-3 py-1 rounded-full inline-flex items-center">
-              Цена договорная
-            </span>
-            <span className="bg-gray-100 text-gray-800 text-sm px-3 py-1 rounded-full inline-flex items-center">
-              <FaClock className="mr-2" /> Минимум 2ч
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <FaWeight className="text-gray-400 flex-shrink-0" />
-              <span className="text-gray-600 whitespace-nowrap">Грузоподъёмность:</span>
-              <span className="font-medium">2,5 т</span>
+    <div className="w-full max-w-[1366px] mx-auto max-[700px]:flex-col
+     max-[700px]:items-center justify-between  flex  space-x-4
+     bg-white border border-gray-200 rounded-lg shadow-md p-4 sm:p-6 ">
+            <div className="flex-shrink-0">
+                <Image src={Car} alt="Газель next" className="rounded-lg w-48 h-48 object-cover"/>
+                    
+                <div className="text-sm text-gray-500 mt-2">
+                  <FaCalendar className="inline mr-1" /> Дата создания: 19.12.2024
+                </div>
             </div>
-            <div className="flex items-center gap-2">
-              <FaRuler className="text-gray-400 flex-shrink-0" />
-              <span className="text-gray-600 whitespace-nowrap">Габариты:</span>
-              <span className="font-medium">6 × 2,3 м</span>
+            <div className="flex-grow">
+                <h2 className="text-lg font-bold">Газель next в поисках работы</h2>
+                <div className="flex max-[940px]:grid max-[940px]:grid-cols-2 gap-3 max-[700px]:grid-cols-1">
+                    <p className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-xl ">
+                      <FaTruck className="inline mr-1" /> Лёгковые и микроавтобусы
+                    </p>
+                    <p className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-xl ">
+                      <FaWeight className="inline mr-1" /> Цена договорная
+                    </p>
+                    <p className="bg-gray-200 text-gray-800 text-sm px-2 py-1 rounded-xl ">
+                      <FaClock className="inline mr-1" /> Минимум 2ч.
+                    </p>
+                </div>
+                <div className="mt-4">
+                <div className="flex text-sm text-gray-800">
+                    <div className="w-48">
+                      <FaWeight className="inline mr-1" /> Грузоподъёмность, т
+                    </div>
+                    <div>- 2,5</div>
+                </div>
+                <div className="flex text-sm text-gray-800">
+                    <div className="w-48">
+                      <FaRuler className="inline mr-1" /> Длина платформы, м
+                    </div>
+                    <div>- 6</div>
+                </div>
+                <div className="flex text-sm text-gray-800">
+                    <div className="w-48">
+                      <FaRuler className="inline mr-1" /> Ширина платформы, м
+                    </div>
+                    <div>- 2,3</div>
+                </div>
+                <div className="text-sm text-gray-500 mt-2">Перевозка грузов на газели</div>
+                </div>
             </div>
-          </div>
-
-          <p className="text-gray-600 text-sm">
-            Перевозка грузов на газели
-          </p>
+            <div className="max-[700px]:gap-7 flex flex-col justify-between items-end max-[700px]:w-full max-[700px]:items-center
+             max-w-[400px] max-[700px]:text-center">
+                <div className="text-gray-500 text-sm">
+                  <FaCalendar className="inline mr-1" /> С 19.12.2024 - По 22.12.2024
+                </div>
+                <div className="flex flex-col space-y-2 max-[700px]:items-center justify-center max-[700px]:w-full">
+                <button className="bg-black text-white w-full px-4 py-2 rounded hover:bg-gray-800">Связаться</button>
+                <button className="bg-gray-200 text-gray-800 w-full px-4 py-2 rounded hover:bg-gray-300">Подробнее</button>
+                </div>
+                <div className="text-sm text-gray-500 mt-2">
+                  <FaMapMarkerAlt className="inline mr-1" /> Рязань, Рязанская обл.
+                </div>
+            </div>
         </div>
-
-        <div className="flex flex-col sm:flex-row lg:flex-col justify-between gap-4 lg:min-w-[200px]">
-          <div className="text-sm text-gray-500 text-center lg:text-right">
-            <FaCalendar className="inline mr-2" />
-            19.12.2024 - 22.12.2024
-          </div>
-
-          <div className="flex flex-col gap-2 w-full sm:w-auto lg:w-full">
-            <button className="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors">
-              Связаться
-            </button>
-            <button className="w-full px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors">
-              Подробнее
-            </button>
-          </div>
-
-          <div className="text-sm text-gray-500 text-center lg:text-right">
-            <FaMapMarkerAlt className="inline mr-2" />
-            Рязань, Рязанская обл.
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }

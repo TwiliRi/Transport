@@ -1,0 +1,7 @@
+{
+    "codesnap.backgroundColor": "#fff",
+    "codesnap.transparentBackground": true,
+    "codesnap.showWindowControls": false,
+    "codesnap.containerPadding": "0",
+    "codesnap.boxShadow": "none"
+}

@@ -1,11 +1,212 @@
 "use client";
 
-import { useState } from "react";
-import { FaTruck, FaBox, FaMapMarkerAlt, FaCalendar, FaMoneyBillWave, FaSearch } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaTruck, FaBox, FaMapMarkerAlt, FaCalendar, FaMoneyBillWave, FaSearch, FaUser } from "react-icons/fa";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { api } from "~/trpc/react"; // Добавляем импорт API
+import SearchForm from "../_components/SearchForm";
+import CreateForm from "../_components/CreateForm";
+import OrderCard from "../_components/OrderCard";
+
+// Типы для грузов
+type OrderStatus = 'active' | 'completed' | 'cancelled' | '';
+type SortOption = 'date-desc' | 'date-asc' | 'price-desc' | 'price-asc' | 'route-from' | 'route-to' | '';
+
+interface Order {
+  id: string;
+  number: string;
+  status: 'active' | 'completed' | 'cancelled';
+  date: string;
+  route: {
+    from: string;
+    to: string;
+  };
+  price: number;
+  cargo: {
+    type: string;
+    weight: string;
+  };
+  transportType?: {
+    value: string;
+    label: string;
+  };
+  imageUrl?: string; // Добавляем опциональное поле для URL изображения
+  description?: string; // Добавляем опциональное поле для описания груза
+  user?: {
+    id: string;
+    name: string;
+  };
+}
 
 export default function Load() {
   const [currentPage, setCurrentPage] = useState("load");
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+  const [statusFilter, setStatusFilter] = useState<OrderStatus>('');
+  const [sortOption, setSortOption] = useState<SortOption>('');
+  const [routeFromFilter, setRouteFromFilter] = useState('');
+  const [routeToFilter, setRouteToFilter] = useState('');
+  const [minWeightFilter, setMinWeightFilter] = useState<number | null>(null);
+  const [maxWeightFilter, setMaxWeightFilter] = useState<number | null>(null);
+  const [dateFilter, setDateFilter] = useState<string>(''); 
+  const [isLoading, setIsLoading] = useState(true);
+  const [transportTypeFilter, setTransportTypeFilter] = useState<string>("all");
 
+  // Загружаем пользовательские типы транспорта из localStorage только на стороне клиента
+  
+
+  // Используем tRPC для получения заказов из базы данных
+  const { data: dbOrders, isLoading: isOrdersLoading } = api.order.getAll.useQuery(
+    {
+      status: statusFilter || undefined,
+      routeFrom: routeFromFilter || undefined,
+      routeTo: routeToFilter || undefined,
+      date: dateFilter || undefined,
+    },
+    {
+      // Обновляем данные при изменении фильтров
+      enabled: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  // Преобразуем данные из базы в формат для отображения
+  useEffect(() => {
+    if (dbOrders) {
+      const formattedOrders: Order[] = dbOrders.map(order => ({
+        id: order.id,
+        number: order.number,
+        status: order.status as 'active' | 'completed' | 'cancelled',
+        date: formatDate(order.date), // Преобразуем дату в нужный формат
+        route: {
+          from: order.routeFrom,
+          to: order.routeTo,
+        },
+        price: order.price,
+        cargo: {
+          type: order.cargoType,
+          weight: order.cargoWeight,
+        },
+        description: order.description || undefined,
+        user: order.user ? {
+          id: order.user.id,
+          name: order.user.name || "Неизвестный пользователь"
+        } : undefined
+      }));
+      
+      setOrders(formattedOrders);
+      setIsLoading(false);
+    }
+  }, [dbOrders]);
+
+  // Функция для форматирования даты из ISO в формат DD.MM.YYYY
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+  };
+
+  // Применение фильтров и сортировки при их изменении
+  useEffect(() => {
+    let result = [...orders];
+
+    // Применяем фильтр по дате
+    if (dateFilter) {
+      result = result.filter(order => {
+        // Преобразуем дату заказа в формат YYYY-MM-DD для сравнения
+        const orderDateParts = order.date.split('.');
+        const formattedOrderDate = `${orderDateParts[2]}-${orderDateParts[1]}-${orderDateParts[0]}`;
+        return formattedOrderDate === dateFilter;
+      });
+    }
+    
+    // Применяем фильтр по статусу
+    if (statusFilter) {
+      result = result.filter(order => order.status === statusFilter);
+    }
+    
+    // Применяем фильтр по маршруту (откуда)
+    if (routeFromFilter) {
+      result = result.filter(order => 
+        order.route.from.toLowerCase().includes(routeFromFilter.toLowerCase())
+      );
+    }
+    
+    // Применяем фильтр по маршруту (куда)
+    if (routeToFilter) {
+      result = result.filter(order => 
+        order.route.to.toLowerCase().includes(routeToFilter.toLowerCase())
+      );
+    }
+
+    // Применяем фильтр по весу
+    if (minWeightFilter !== null || maxWeightFilter !== null) {
+      result = result.filter(order => {
+        // Извлекаем числовое значение из строки веса
+        let weightInKg: number;
+        
+        // Проверяем, содержит ли строка 'т' (тонны) или 'кг'
+        if (order.cargo.weight.includes('т')) {
+          // Если вес указан в тоннах, конвертируем в килограммы
+          const weightStr = order.cargo.weight.replace('т', '').trim();
+          weightInKg = parseFloat(weightStr) * 1000;
+        } else {
+          // Если вес указан в кг или без единиц измерения
+          const weightStr = order.cargo.weight.replace('кг', '').trim();
+          weightInKg = parseFloat(weightStr);
+        }
+        
+        // Применяем фильтры
+        if (minWeightFilter !== null && maxWeightFilter !== null) {
+          return weightInKg >= minWeightFilter && weightInKg <= maxWeightFilter;
+        } else if (minWeightFilter !== null) {
+          return weightInKg >= minWeightFilter;
+        } else if (maxWeightFilter !== null) {
+          return weightInKg <= maxWeightFilter;
+        }
+        return true;
+      });
+    }
+    
+    // Применяем сортировку
+    if (sortOption) {
+      result.sort((a, b) => {
+        switch (sortOption) {
+          case 'date-desc':
+            // Преобразуем даты для корректного сравнения
+            return new Date(b.date.split('.').reverse().join('-')).getTime() - 
+                   new Date(a.date.split('.').reverse().join('-')).getTime();
+          case 'date-asc':
+            return new Date(a.date.split('.').reverse().join('-')).getTime() - 
+                   new Date(b.date.split('.').reverse().join('-')).getTime();
+          case 'price-desc':
+            return b.price - a.price;
+          case 'price-asc':
+            return a.price - b.price;
+          case 'route-from':
+            return a.route.from.localeCompare(b.route.from);
+          case 'route-to':
+            return a.route.to.localeCompare(b.route.to);
+          default:
+            return 0;
+        }
+      });
+    }
+    
+    // Применяем фильтр по типу транспорта
+    if (transportTypeFilter && transportTypeFilter !== 'all') {
+      result = result.filter(order => {
+        // Проверяем, соответствует ли тип груза выбранному типу транспорта
+        return order.cargo.type === transportTypeFilter;
+      });
+    }
+    
+    setFilteredOrders(result);
+  }, [statusFilter, sortOption, routeFromFilter, routeToFilter, minWeightFilter, maxWeightFilter, dateFilter, transportTypeFilter, orders]);
+  
   return (
     <div className="max-w-[1366px] mx-auto px-4 py-8">
       <div className="mb-8">
@@ -30,245 +231,77 @@ export default function Load() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        {currentPage === "load" ? <SearchForm /> : <CreateForm />}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8 overflow-hidden">
+        <AnimatePresence mode="wait">
+          {currentPage === "load" ? (
+            <motion.div
+              key="search"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <SearchForm 
+                statusFilter={statusFilter} 
+                setStatusFilter={setStatusFilter} 
+                sortOption={sortOption} 
+                setSortOption={setSortOption}
+                routeFromFilter={routeFromFilter}
+                setRouteFromFilter={setRouteFromFilter}
+                routeToFilter={routeToFilter}
+                setRouteToFilter={setRouteToFilter}
+                minWeightFilter={minWeightFilter}
+                setMinWeightFilter={setMinWeightFilter}
+                maxWeightFilter={maxWeightFilter}
+                setMaxWeightFilter={setMaxWeightFilter}
+                dateFilter={dateFilter} // Передаем состояние и функцию
+                setDateFilter={setDateFilter} // для фильтра по дате
+                transportTypeFilter={transportTypeFilter}
+                setTransportTypeFilter={setTransportTypeFilter}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="create"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <CreateForm />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="mt-12">
         <h2 className="text-2xl font-bold mb-6">Доступные заказы</h2>
         <div className="space-y-4">
-          <OrderCard />
-          <OrderCard />
-          <OrderCard />
+          <AnimatePresence>
+            {filteredOrders.length > 0 ? (
+              filteredOrders.map((order) => (
+                <motion.div
+                  key={order.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  layout
+                >
+                  <OrderCard order={order} />
+                </motion.div>
+              ))
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-8"
+              >
+                <p className="text-gray-500">Заказы не найдены</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function SearchForm() {
-  return (
-    <form className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Маршрут</label>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Откуда"
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
-                onChange={(e) => {
-                  e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
-                }}
-              />
-            </div>
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Куда"
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
-                onChange={(e) => {
-                  e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
-                }}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Вес (тонны)</label>
-          <div className="flex gap-4">
-            <input
-              type="number"
-              placeholder="От"
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
-              onChange={(e) => {
-                const value = parseFloat(e.target.value);
-                if (value < 0 || value > 100 || isNaN(value)) {
-                  e.target.value = '';
-                }
-              }}
-            />
-            <input
-              type="number"
-              placeholder="До"
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
-              onChange={(e) => {
-                const value = parseFloat(e.target.value);
-                if (value < 0 || value > 100 || isNaN(value)) {
-                  e.target.value = '';
-                }
-              }}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Тип транспорта</label>
-          <select className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black">
-            <option value="all">Все виды</option>
-            <option value="truck">Грузовик</option>
-            <option value="truck_with_trailer">Фура</option>
-            <option value="car">Легковой автомобиль</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Дата погрузки</label>
-          <input
-            type="date"
-            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
-          />
-        </div>
-      </div>
-
-      <div className="flex justify-center gap-4 pt-4">
-        <button
-          type="reset"
-          className="px-6 py-2 rounded-lg border-2 border-gray-200 hover:bg-gray-50 transition-colors"
-        >
-          Сбросить
-        </button>
-        <button
-          type="submit"
-          className="px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors"
-        >
-          <FaSearch className="inline mr-2" />
-          Найти
-        </button>
-      </div>
-    </form>
-  );
-}
-
-function CreateForm() {
-  return (
-    <form className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Маршрут</label>
-          <div className="flex gap-4">
-            <input
-              type="text"
-              placeholder="Откуда"
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
-              onChange={(e) => {
-                e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
-              }}
-            />
-            <input
-              type="text"
-              placeholder="Куда"
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
-              onChange={(e) => {
-                e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z]/g, '');
-              }}
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Вес груза (тонны)</label>
-          <input
-            type="number"
-            placeholder="Вес"
-            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
-            onChange={(e) => {
-              const value = parseFloat(e.target.value);
-              if (value < 0 || value > 100 || isNaN(value)) {
-                e.target.value = '';
-              }
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Описание груза</label>
-          <textarea
-            placeholder="Опишите ваш груз"
-            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
-            rows={3}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Фотографии груза</label>
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
-          />
-        </div>
-      </div>
-
-      <div className="flex justify-center gap-4 pt-4">
-        <button
-          type="reset"
-          className="px-6 py-2 rounded-lg border-2 border-gray-200 hover:bg-gray-50 transition-colors"
-        >
-          Сбросить
-        </button>
-        <button
-          type="submit"
-          className="px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors"
-        >
-          Разместить заказ
-        </button>
-      </div>
-    </form>
-  );
-}
-
-function OrderCard() {
-  return (
-    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-xl font-bold mb-2">Перевозка мебели</h3>
-          <div className="flex items-center text-gray-600">
-            <FaMapMarkerAlt className="mr-2" />
-            <span>Москва → Санкт-Петербург</span>
-          </div>
-        </div>
-        <span className="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
-          Активный
-        </span>
-      </div>
-
-      <div className="grid grid-cols-3 gap-4 mb-4">
-        <div>
-          <div className="text-sm text-gray-600 mb-1">
-            <FaCalendar className="inline mr-1" /> Дата погрузки
-          </div>
-          <div className="font-medium">20.05.2024</div>
-        </div>
-        <div>
-          <div className="text-sm text-gray-600 mb-1">
-            <FaTruck className="inline mr-1" /> Тип транспорта
-          </div>
-          <div className="font-medium">Грузовик</div>
-        </div>
-        <div>
-          <div className="text-sm text-gray-600 mb-1">
-            <FaMoneyBillWave className="inline mr-1" /> Стоимость
-          </div>
-          <div className="font-medium">15 000 ₽</div>
-        </div>
-      </div>
-
-      <div className="flex justify-end gap-3">
-        <button className="px-4 py-2 text-sm rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-          Подробнее
-        </button>
-        <button className="px-4 py-2 text-sm rounded-lg bg-black text-white hover:bg-gray-800 transition-colors">
-          Откликнуться
-        </button>
       </div>
     </div>
   );

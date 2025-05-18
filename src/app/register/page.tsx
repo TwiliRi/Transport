@@ -79,7 +79,8 @@ export default function Register() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="pl-10 w-full py-2 px-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                className="pl-10 w-full py-2 px-4 border border-gray-300 rounded-md 
+                focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                 placeholder="Введите ваше имя"
                 required
               />
