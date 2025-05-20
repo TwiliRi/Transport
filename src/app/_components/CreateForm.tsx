@@ -1,5 +1,7 @@
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "~/trpc/react";
+import OrderCard from "./OrderCard";
 
 export default function CreateForm() {
     // Добавляем состояние для типа транспорта
@@ -41,16 +43,19 @@ export default function CreateForm() {
     const [cargoWeight, setCargoWeight] = useState("");
     const [price, setPrice] = useState("");
     const [description, setDescription] = useState("");
-    const [images, setImages] = useState<FileList | null>(null);
     
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
     // Состояния для обработки отправки формы
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
-    
+    const router = useRouter();
     // Используем tRPC мутацию для создания заказа
     const createOrderMutation = api.order.create.useMutation({
       onSuccess: () => {
+        console.log("Order created successfully");
+        
         setSuccess(true);
         // Сбрасываем форму
         setFromCity("");
@@ -60,8 +65,6 @@ export default function CreateForm() {
         setPrice("");
         setTransportType("");
         setDescription("");
-        setImages(null);
-        
         // Скрываем сообщение об успехе через 3 секунды
         setTimeout(() => {
           setSuccess(false);
@@ -114,7 +117,27 @@ export default function CreateForm() {
       setFromCity(city);
       setShowFromSuggestions(false);
     };
-  
+    // Обработчик изменения изображения
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        // Проверяем размер файла (максимум 5 МБ)
+        if (file.size > 5 * 1024 * 1024) {
+          setError("Размер файла превышает 5 МБ");
+          return;
+        }
+        
+        // Показываем предпросмотр изображения
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result as string);
+          // Сохраняем изображение в формате base64 строки
+          setImageUrl(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    
     // Обработчик выбора города из списка "Куда"
     const handleSelectToCity = (city: string) => {
       setToCity(city);
@@ -169,6 +192,7 @@ export default function CreateForm() {
           cargoType: transportType || "any", // Если тип транспорта не выбран, используем "any"
           price: parseFloat(price),
           description: description,
+          imageUrl: imageUrl || undefined, // Добавляем изображение в запрос
         });
         
       } catch (err) {
@@ -178,6 +202,8 @@ export default function CreateForm() {
           setError("Произошла ошибка при создании заказа");
         }
         setLoading(false);
+        
+        
       }
     };
   
@@ -327,14 +353,7 @@ export default function CreateForm() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Фотографии груза</label>
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
-              onChange={(e) => setImages(e.target.files)}
-            />
+            
           </div>
         </div>
   
@@ -348,7 +367,27 @@ export default function CreateForm() {
             onChange={(e) => setDescription(e.target.value)}
           />
         </div>
-  
+        <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Фотография груза</label>
+            <div className="flex flex-col space-y-2">
+              {imagePreview && (
+                <div className="relative w-full h-40 mb-2">
+                  <img 
+                    src={imagePreview} 
+                    alt="Предпросмотр груза" 
+                    className="w-full h-full object-contain rounded-lg border border-gray-200"
+                  />
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
+                onChange={handleImageChange}
+              />
+              <p className="text-xs text-gray-500">Загрузите фотографию груза (макс. 5 МБ)</p>
+            </div>
+        </div>      
         <div className="flex justify-center gap-4 pt-4">
           <button
             type="reset"
@@ -361,7 +400,8 @@ export default function CreateForm() {
               setPrice("");
               setTransportType("");
               setDescription("");
-              setImages(null);
+              setImagePreview(null),
+              setImageUrl(""),
               setError("");
               setSuccess(false);
             }}

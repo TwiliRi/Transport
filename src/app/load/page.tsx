@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { api } from "~/trpc/react"; // Добавляем импорт API
 import SearchForm from "../_components/SearchForm";
 import CreateForm from "../_components/CreateForm";
-import OrderCard from "../_components/OrderCard";
+import OrderCard, { OrderCardSkeleton } from "../_components/OrderCard";
 
 // Типы для грузов
 type OrderStatus = 'active' | 'completed' | 'cancelled' | '';
@@ -40,6 +40,8 @@ interface Order {
 }
 
 export default function Load() {
+
+
   const [currentPage, setCurrentPage] = useState("load");
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
@@ -71,6 +73,14 @@ export default function Load() {
     }
   );
 
+  
+
+
+
+
+
+
+
   // Преобразуем данные из базы в формат для отображения
   useEffect(() => {
     if (dbOrders) {
@@ -89,6 +99,7 @@ export default function Load() {
           weight: order.cargoWeight,
         },
         description: order.description || undefined,
+        imageUrl: order.imageUrl || undefined, // Добавляем поле imageUrl
         user: order.user ? {
           id: order.user.id,
           name: order.user.name || "Неизвестный пользователь"
@@ -243,21 +254,21 @@ export default function Load() {
             >
               <SearchForm 
                 statusFilter={statusFilter} 
-                setStatusFilter={setStatusFilter} 
+                setStatusFilter={setStatusFilter} // для фильтра по Статусу
                 sortOption={sortOption} 
-                setSortOption={setSortOption}
+                setSortOption={setSortOption} // для сортировки по различным типам 
                 routeFromFilter={routeFromFilter}
-                setRouteFromFilter={setRouteFromFilter}
+                setRouteFromFilter={setRouteFromFilter} // для фильтра по месту назначения (от)
                 routeToFilter={routeToFilter}
-                setRouteToFilter={setRouteToFilter}
+                setRouteToFilter={setRouteToFilter} // для фильтра по по месту назначения (до)
                 minWeightFilter={minWeightFilter}
-                setMinWeightFilter={setMinWeightFilter}
+                setMinWeightFilter={setMinWeightFilter} // для фильтра по весу (от)
                 maxWeightFilter={maxWeightFilter}
-                setMaxWeightFilter={setMaxWeightFilter}
-                dateFilter={dateFilter} // Передаем состояние и функцию
+                setMaxWeightFilter={setMaxWeightFilter} // для фильтра по весу (до)
+                dateFilter={dateFilter} 
                 setDateFilter={setDateFilter} // для фильтра по дате
                 transportTypeFilter={transportTypeFilter}
-                setTransportTypeFilter={setTransportTypeFilter}
+                setTransportTypeFilter={setTransportTypeFilter} // для фильтра по типу транспорта
               />
             </motion.div>
           ) : (
@@ -278,7 +289,21 @@ export default function Load() {
         <h2 className="text-2xl font-bold mb-6">Доступные заказы</h2>
         <div className="space-y-4">
           <AnimatePresence>
-            {filteredOrders.length > 0 ? (
+            {isLoading ? (
+              // Показываем скелетоны во время загрузки
+              <>
+                {[1, 2, 3].map((i) => (
+                  <motion.div
+                    key={`skeleton-${i}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: i * 0.1 }}
+                  >
+                    <OrderCardSkeleton />
+                  </motion.div>
+                ))}
+              </>
+            ) : filteredOrders.length > 0 ? (
               filteredOrders.map((order) => (
                 <motion.div
                   key={order.id}

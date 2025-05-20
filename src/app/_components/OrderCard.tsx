@@ -1,7 +1,12 @@
-import { FaTruck, FaBox, FaMapMarkerAlt, FaCalendar, FaMoneyBillWave, FaSearch, FaUser } from "react-icons/fa";
+"use client";
+import { FaTruck, FaBox, FaMapMarkerAlt, FaCalendar, FaMoneyBillWave, FaSearch, FaUser, FaSync } from "react-icons/fa";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
+import EditOrderForm from "./EditOrderForm";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 
 
@@ -24,16 +29,72 @@ interface Order {
       label: string;
     };
     imageUrl?: string; // Добавляем опциональное поле для URL изображения
-    description?: string; // Добавляем опциональное поле для описания груза
+    description?: string; 
     user?: {
       id: string;
       name: string;
     };
   }
 
+// Компонент скелетона для OrderCard
+export function OrderCardSkeleton() {
+  return (
+    <div className="bg-white border border-gray-400 rounded-lg shadow-md p-4 sm:p-6 animate-pulse">
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-grow">
+          <div className="flex justify-between items-start mb-3">
+            <div className="h-6 bg-gray-400 rounded w-32"></div>
+            <div className="h-5 bg-gray-400 rounded w-16"></div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+            <div className="flex items-center">
+              <div className="w-4 h-4 mr-2 bg-gray-400 rounded-full"></div>
+              <div className="h-4 bg-gray-400 rounded w-24"></div>
+            </div>
+            <div className="flex items-center">
+              <div className="w-4 h-4 mr-2 bg-gray-400 rounded-full"></div>
+              <div className="h-4 bg-gray-400 rounded w-40"></div>
+            </div>
+            <div className="flex items-center">
+              <div className="w-4 h-4 mr-2 bg-gray-400 rounded-full"></div>
+              <div className="h-4 bg-gray-400 rounded w-32"></div>
+            </div>
+            <div className="flex items-center">
+              <div className="w-4 h-4 mr-2 bg-gray-400 rounded-full"></div>
+              <div className="h-4 bg-gray-400 rounded w-20"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex flex-row md:flex-col justify-between gap-4 md:min-w-[150px]">
+          <div className="w-full h-10 bg-gray-400 rounded-lg"></div>
+          <div className="w-full h-10 bg-gray-400 rounded-lg"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function OrderCard({ order }: { order: Order }) {
     const [showDetails, setShowDetails] = useState(false);
-  
+    const [showEditForm, setShowEditForm] = useState(false);
+    const { data: session } = useSession();
+    const [isOwner, setIsOwner] = useState(false);
+    const router = useRouter(); // Добавляем useRouter для обновления страницы
+    
+
+
+    // Проверяем, является ли текущий пользователь владельцем заказа
+    useEffect(() => {
+      if (session && order.user) {
+        setIsOwner(session.user.id === order.user.id);
+      }
+    }, [session, order]);
+   
+    // Добавляем эффект для обновления страницы при изменении заказа
+    
+    
     // Функция для отображения статуса заказа
     const renderStatusBadge = (status: string) => {
       switch (status) {
@@ -41,6 +102,8 @@ export default function OrderCard({ order }: { order: Order }) {
           return <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Завершен</span>;
         case 'active':
           return <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Активен</span>;
+        case 'processing':
+          return <span className="bg-blue-100 text-blue-500 text-xs font-medium px-2.5 py-0.5 rounded">Обработка</span>;
         case 'cancelled':
           return <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">Отменен</span>;
         default:
@@ -69,6 +132,7 @@ export default function OrderCard({ order }: { order: Order }) {
       
       // Если это стандартный тип, возвращаем его название
       if (typeValue in standardTypes) {
+        
         return standardTypes[typeValue];
       }
       
@@ -82,7 +146,10 @@ export default function OrderCard({ order }: { order: Order }) {
     };
   
     return (
+      
       <div className="bg-white border border-gray-200 rounded-lg shadow-md p-4 sm:p-6">
+
+          
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-grow">
             <div className="flex justify-between items-start mb-3">
@@ -107,18 +174,40 @@ export default function OrderCard({ order }: { order: Order }) {
                 <FaMoneyBillWave className="text-gray-400 mr-2" />
                 <span className="text-sm">{order.price.toLocaleString()} ₽</span>
               </div>
-              
-              
             </div>
           </div>
           
           <div className="flex flex-row md:flex-col justify-between gap-4 md:min-w-[150px]">
-            <button className="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors">
-              Откликнуться
-            </button>
+            {isOwner ? (
+              <button 
+                className="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                onClick={() => setShowEditForm(true)}
+              >
+                Редактировать
+              </button>
+            ) : (
+              order.status === 'cancelled' ? (
+                <button 
+                  className="w-full px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed"
+                  disabled
+                >
+                  Заказ отменен
+                </button>
+              ) : (
+                <button 
+                  className="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                  onClick={() => {
+                    // Здесь будет логика отклика на заказ
+                    alert("Вы откликнулись на заказ!");
+                  }}
+                >
+                  Откликнуться
+                </button>
+              )
+            )}
             <button 
               className="w-full px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors"
-              onClick={() => setShowDetails(true)} // Открываем модальное окно
+              onClick={() => setShowDetails(true)}
             >
               Подробнее
             </button>
@@ -132,7 +221,7 @@ export default function OrderCard({ order }: { order: Order }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+              className="fixed inset-0 bg-black/60  flex items-center justify-center p-4 z-50"
               onClick={() => setShowDetails(false)} // Закрываем по клику на фон
             >
               <motion.div
@@ -167,10 +256,13 @@ export default function OrderCard({ order }: { order: Order }) {
                     </div>
                   </div>
                 )}
-                
                 {order.imageUrl && (
                   <div className="mb-4">
-                    <img src={order.imageUrl} alt={`Груз для заказа ${order.number}`} className="rounded-lg max-h-60 w-auto mx-auto" />
+                    <img 
+                      src={order.imageUrl} 
+                      alt="Изображение груза" 
+                      className="w-full max-h-[300px] object-contain rounded-lg"
+                    />
                   </div>
                 )}
                 {order.description && (
@@ -190,6 +282,37 @@ export default function OrderCard({ order }: { order: Order }) {
                     Закрыть
                   </button>
                 </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Модальное окно для редактирования заказа */}
+        <AnimatePresence>
+          {showEditForm && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0  bg-black/60 flex items-center justify-center p-4 z-50"
+              onClick={() => setShowEditForm(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full relative overflow-y-auto max-h-[90vh]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button 
+                  onClick={() => setShowEditForm(false)} 
+                  className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  &times;
+                </button>
+                <h4 className="text-xl font-semibold mb-4">Редактирование заказа #{order.number}</h4>
+                
+                <EditOrderForm order={order} onClose={() => setShowEditForm(false)} />
               </motion.div>
             </motion.div>
           )}
