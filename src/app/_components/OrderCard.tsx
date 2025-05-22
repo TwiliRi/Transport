@@ -1,13 +1,16 @@
 "use client";
-import { FaTruck, FaBox, FaMapMarkerAlt, FaCalendar, FaMoneyBillWave, FaSearch, FaUser, FaSync } from "react-icons/fa";
+import { FaTruck, FaBox, FaMapMarkerAlt, FaCalendar, FaMoneyBillWave, FaSearch, FaUser, FaSync, FaComments } from "react-icons/fa";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import EditOrderForm from "./EditOrderForm";
+import ResponseForm from "./ResponseForm";
+import ResponsesList from "./ResponsesList";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-
+import { api } from "~/trpc/react";
+import Chat from "./Chat";
 
 
 interface Order {
@@ -79,12 +82,13 @@ export function OrderCardSkeleton() {
 export default function OrderCard({ order }: { order: Order }) {
     const [showDetails, setShowDetails] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
+    const [showResponseForm, setShowResponseForm] = useState(false);
+    const [showResponses, setShowResponses] = useState(false);
     const { data: session } = useSession();
     const [isOwner, setIsOwner] = useState(false);
-    const router = useRouter(); // Добавляем useRouter для обновления страницы
+    const [userResponse, setUserResponse] = useState<{ id: string; status: string } | null>(null);
+    const router = useRouter();
     
-
-
     // Проверяем, является ли текущий пользователь владельцем заказа
     useEffect(() => {
       if (session && order.user) {
@@ -92,8 +96,24 @@ export default function OrderCard({ order }: { order: Order }) {
       }
     }, [session, order]);
    
-    // Добавляем эффект для обновления страницы при изменении заказа
+    // Проверяем, откликался ли текущий пользователь на этот заказ
+    const { data: responseData } = api.response.getByOrderId.useQuery(
+      { orderId: order.id },
+      { 
+        enabled: !!session && !!order.id && !isOwner,
+        refetchInterval: false
+      }
+    );
     
+    // Обновляем информацию об отклике пользователя
+    useEffect(() => {
+      if (responseData && responseData.length > 0) {
+        setUserResponse({
+          id: responseData[0]?.id ?? '',
+          status: responseData[0]?.status ?? 'pending'
+        });
+      }
+    }, [responseData]);
     
     // Функция для отображения статуса заказа
     const renderStatusBadge = (status: string) => {
@@ -148,7 +168,6 @@ export default function OrderCard({ order }: { order: Order }) {
     return (
       
       <div className="bg-white border border-gray-200 rounded-lg shadow-md p-4 sm:p-6">
-
           
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-grow">
@@ -177,43 +196,127 @@ export default function OrderCard({ order }: { order: Order }) {
             </div>
           </div>
           
-          <div className="flex flex-row md:flex-col justify-between gap-4 md:min-w-[150px]">
+          <div className="flex flex-row md:flex-col justify-between gap-4 md:min-w-[200px]">
             {isOwner ? (
-              <button 
-                className="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-                onClick={() => setShowEditForm(true)}
-              >
-                Редактировать
-              </button>
+              <>
+                <button 
+                  className="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors min-w-[200px]"
+                  onClick={() => setShowEditForm(true)}
+                >
+                  Редактировать
+                </button>
+                <button 
+                  className="w-full px-4 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors flex items-center justify-center min-w-[200px]"
+                  onClick={() => setShowResponses(!showResponses)}
+                >
+                  <FaComments className="mr-2" />
+                  {showResponses ? "Скрыть отклики" : "Показать отклики"}
+                </button>
+              </>
+            ) : userResponse ? (
+              // Если пользователь откликнулся на заказ, показываем кнопку для просмотра чата
+              <>
+                <button 
+                  className="w-full px-4 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors flex items-center justify-center min-w-[200px]"
+                  onClick={() => setShowResponses(!showResponses)}
+                >
+                  <FaComments className="mr-2" />
+                  {showResponses ? "Скрыть чат" : "Открыть чат"}
+                </button>
+                <button 
+                  className="w-full px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors min-w-[200px]"
+                  onClick={() => setShowDetails(true)}
+                >
+                  Подробнее
+                </button>
+              </>
             ) : (
               order.status === 'cancelled' ? (
                 <button 
-                  className="w-full px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed"
+                  className="w-full px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed min-w-[200px]"
                   disabled
                 >
                   Заказ отменен
                 </button>
               ) : (
                 <button 
-                  className="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-                  onClick={() => {
-                    // Здесь будет логика отклика на заказ
-                    alert("Вы откликнулись на заказ!");
-                  }}
+                  className="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors min-w-[200px]"
+                  onClick={() => setShowResponseForm(true)}
                 >
                   Откликнуться
                 </button>
               )
             )}
-            <button 
-              className="w-full px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors"
-              onClick={() => setShowDetails(true)}
-            >
-              Подробнее
-            </button>
+            {!userResponse && !isOwner && (
+              <button 
+                className="w-full px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors min-w-[200px]"
+                onClick={() => setShowDetails(true)}
+              >
+                Подробнее
+              </button>
+            )}
           </div>
         </div>
-  
+        
+        {/* Отображение списка откликов для владельца заказа */}
+        {showResponses && isOwner && (
+          <div className="mt-4 border-t border-gray-200 pt-4">
+            <ResponsesList orderId={order.id} customerId={order.user?.id || ""} />
+          </div>
+        )}
+        
+        {/* Отображение чата для перевозчика, который откликнулся на заказ */}
+        {showResponses && userResponse && !isOwner && (
+          <div className="mt-4 border-t border-gray-200 pt-4">
+            <div className="mb-4">
+              <h4 className="font-medium mb-2">Ваш отклик на заказ</h4>
+              <div className="flex items-center">
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  userResponse.status === 'accepted' 
+                    ? 'bg-green-100 text-green-800' 
+                    : userResponse.status === 'rejected'
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}>
+                  {userResponse.status === 'accepted' 
+                    ? 'Принят' 
+                    : userResponse.status === 'rejected'
+                    ? 'Отклонен'
+                    : 'Ожидает ответа'}
+                </span>
+              </div>
+            </div>
+            <Chat
+              responseId={userResponse.id}
+              orderId={order.id}
+              carrierId={session?.user.id || ""}
+              customerId={order.user?.id || ""}
+            />
+          </div>
+        )}
+        
+        {/* Форма отклика */}
+        {showResponseForm && (
+          <div className="mt-4 border-t border-gray-200 pt-4">
+            <div className="flex justify-between items-center mb-3">
+              <h4 className="font-medium">Откликнуться на заказ</h4>
+              <button 
+                onClick={() => setShowResponseForm(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                &times;
+              </button>
+            </div>
+            <ResponseForm 
+              orderId={order.id} 
+              onSuccess={() => {
+                setShowResponseForm(false);
+                router.refresh();
+              }} 
+            />
+          </div>
+        )}
+        
         {/* Модальное окно для деталей заказа */}
         <AnimatePresence>
           {showDetails && (

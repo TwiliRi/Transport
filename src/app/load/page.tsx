@@ -219,7 +219,7 @@ export default function Load() {
   }, [statusFilter, sortOption, routeFromFilter, routeToFilter, minWeightFilter, maxWeightFilter, dateFilter, transportTypeFilter, orders]);
   
   return (
-    <div className="max-w-[1366px] mx-auto px-4 py-8">
+    <div className="max-w-[1366px] mx-auto px-4 py-8 w-full">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-center mb-6">Грузоперевозки</h1>
         <div className="flex justify-center gap-4 mb-8">

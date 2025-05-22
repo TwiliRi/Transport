@@ -10,7 +10,7 @@ export default function Search() {
   const [currentPage, setCurrentPage] = useState("search");
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+    <div className="w-full max-w-[1366px] mx-auto px-4 sm:px-6 lg:px-8 py-8 ">
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-6">Поиск транспорта</h1>
         <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8">

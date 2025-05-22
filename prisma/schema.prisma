@@ -52,18 +52,22 @@ model Session {
 
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    password      String?
-    phone         String?   // Добавляем поле телефона
-    userType      String?   // Тип пользователя: "carrier" (перевозчик) или "customer" (заказчик)
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
-    orders      Order[]
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  phone         String?   // Добавляем поле телефона
+  userType      String?   // Тип пользователя: "carrier" (перевозчик) или "customer" (заказчик)
+  accounts      Account[]
+  sessions      Session[]
+  posts         Post[]
+  orders        Order[]
+  
+  // Связи для чата
+  responses     Response[] @relation("CarrierResponses")
+  messages      Message[]
 }
 
 model VerificationToken {
@@ -93,5 +97,45 @@ model Order {
   // Связь с пользователем
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Связь с откликами
+  responses   Response[]
 }
+
+// Модель для откликов перевозчиков на заказы
+model Response {
+  id        String   @id @default(cuid())
+  status    String   @default("pending") // pending, accepted, rejected
+  message   String?  // Сообщение от перевозчика
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Связь с заказом
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  // Связь с перевозчиком
+  carrierId String
+  carrier   User     @relation("CarrierResponses", fields: [carrierId], references: [id], onDelete: Cascade)
+  
+  // Связь с сообщениями чата
+  messages  Message[]
+}
+
+// Модель для сообщений чата
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  
+  // Связь с откликом
+  responseId String
+  response   Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  
+  // Связь с отправителем
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+}
+
+
 
