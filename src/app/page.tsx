@@ -33,7 +33,7 @@ export default function Home() {
           </div>
           
           <div className="flex justify-center gap-4 sm:gap-8 mb-8 md:mb-12 flex-wrap">
-            <Link href="/search?type=cargo" className="group w-full sm:w-auto max-w-[280px]">
+            <Link href="/load" className="group w-full sm:w-auto max-w-[280px]">
               <div className="bg-white hover:bg-black text-black hover:text-white
                transition-colors duration-300 shadow-lg rounded-lg p-6 sm:p-8 w-full sm:w-[280px]
                 text-center border border-gray-100 group-hover:border-black">

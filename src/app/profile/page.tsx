@@ -1,12 +1,7 @@
 import Link from "next/link";
 import { auth } from "~/server/auth";
-import { FaUser, FaBox, FaTruck, FaSignOutAlt, FaHistory } from "react-icons/fa";
+import { FaUser, FaBox, FaTruck, FaSignOutAlt, FaHistory, FaArrowRight } from "react-icons/fa";
 import { db } from "~/server/db";
-
-
-
-
-
 
 export default async function Profile() {
   const session = await auth();
@@ -39,6 +34,47 @@ export default async function Profile() {
       userType: true,
     },
   });
+  
+  // Получаем последние 3 заказа пользователя
+  const recentOrders = await db.order.findMany({ 
+    where: { 
+      userId: session.user.id 
+    },
+    orderBy: {
+      date: 'desc' // Сортировка по дате (сначала новые)
+    },
+    take: 3, // Берем только 3 последних заказа
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+        }
+      }
+    }
+  });
+  
+  // Преобразуем данные из базы в формат для отображения
+  const formattedOrders = recentOrders.map(order => ({
+    id: order.id,
+    number: order.number,
+    status: order.status,
+    date: formatDate(order.date),
+    route: {
+      from: order.routeFrom,
+      to: order.routeTo,
+    },
+    price: order.price,
+  }));
+  
+  // Функция для форматирования даты из ISO в формат DD.MM.YYYY
+  function formatDate(dateString: string) {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+  }
   
   return (
     <>
@@ -95,38 +131,52 @@ export default async function Profile() {
                 </Link>
               </div>
               
-              {/* Пример заказов */}
               <div className="space-y-4">
-                {[1, 2, 3].map((order) => (
-                  <div key={order} className="border border-gray-200 rounded-md p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex justify-between mb-2">
-                      <span className="font-medium">Заказ #{order}00{order}</span>
-                      <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded-full">Выполнен</span>
+                {formattedOrders.length > 0 ? (
+                  formattedOrders.map((order) => (
+                    <div key={order.id} className="border border-gray-200 rounded-md p-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex justify-between mb-2">
+                        <span className="font-medium">Заказ #{order.number}</span>
+                        <span className={`text-sm px-2 py-1 rounded-full ${
+                          order.status === 'completed' ? 'text-green-600 bg-green-50' : 
+                          order.status === 'active' ? 'text-blue-600 bg-blue-50' : 
+                          'text-red-600 bg-red-50'
+                        }`}>
+                          {order.status === 'completed' ? 'Выполнен' : 
+                           order.status === 'active' ? 'Активен' : 'Отменен'}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-500 mb-2">
+                        <span>Дата: {order.date}</span>
+                        <span className="mx-2">•</span>
+                        <span>Сумма: {order.price.toLocaleString()} ₽</span>
+                      </div>
+                      <div className="flex justify-between items-center mt-2">
+                        <span className="text-sm">{order.route.from} → {order.route.to}</span>
+                        <Link href={`/orders/${order.id}`} className="text-sm text-black hover:underline flex items-center">
+                          Подробнее <FaArrowRight className="ml-1" size={12} />
+                        </Link>
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-500 mb-2">
-                      <span>Дата: 10.0{order}.2023</span>
-                      <span className="mx-2">•</span>
-                      <span>Сумма: {order}0,000 ₽</span>
-                    </div>
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="text-sm">Москва → Санкт-Петербург</span>
-                      <button className="text-sm text-black hover:underline">
-                        Подробнее
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                
-                {/* Если нет заказов */}
-                {false && (
+                  ))
+                ) : (
                   <div className="text-center py-8">
                     <FaBox className="mx-auto text-4xl text-gray-300 mb-3" />
                     <p className="text-gray-500">У вас пока нет заказов</p>
-                    <Link href="/search" className="mt-3 inline-block text-black hover:underline">
-                      Найти перевозчика
+                    <Link href="/load?page=upload" className="mt-3 inline-block text-black hover:underline">
+                      Разместить груз
                     </Link>
                   </div>
                 )}
+              </div>
+              
+              <div className="mt-6 text-center">
+                <Link 
+                  href="/profile/orders" 
+                  className="bg-black text-white font-medium py-2 px-4 rounded-md hover:bg-gray-800 transition-colors inline-flex items-center"
+                >
+                  Все мои заказы <FaArrowRight className="ml-2" />
+                </Link>
               </div>
             </div>
           </div>

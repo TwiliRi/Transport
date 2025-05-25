@@ -104,7 +104,7 @@ export default function  SearchForm({
   
   // Состояние для даты поиска (остается локальным для SearchForm, но также обновляет dateFilter)
   const today = new Date().toISOString().split('T')[0];
-  const [searchDate, setSearchDate] = useState(dateFilter || today); // Инициализируем локальное состояние датой из пропсов или сегодняшней датой
+  const [searchDate, setSearchDate] = useState(dateFilter ); // Инициализируем локальное состояние датой из пропсов или сегодняшней датой
   // Обработчик изменения поля "Откуда"
   const handleFromCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

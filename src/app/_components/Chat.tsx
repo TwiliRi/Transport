@@ -78,19 +78,24 @@ export default function Chat({ responseId, orderId, carrierId, customerId }: Cha
     const sse = new EventSource(`/api/sse?responseId=${responseId}`);
 
     // Обработчик получения сообщений
+    // В обработчике SSE сообщений
     sse.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
         
         if (data.type === "messages" && data.data.length > 0) {
+          // Добавляем проверку на кэшированные данные
+          if (data.cached && messages.length > 0) {
+            // Если данные из кэша и у нас уже есть сообщения, не обновляем
+            return;
+          }
+          
           setMessages(prevMessages => {
             // Фильтруем только новые сообщения, которых еще нет в списке
             const existingIds = new Set(prevMessages.map(msg => msg.id));
             const newMsgs = data.data.filter((msg: Message) => !existingIds.has(msg.id));
             
             if (newMsgs.length === 0) return prevMessages;
-            
-            
             
             // Объединяем существующие и новые сообщения
             return [...prevMessages, ...newMsgs].sort((a, b) => 

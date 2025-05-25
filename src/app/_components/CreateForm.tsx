@@ -59,7 +59,7 @@ export default function CreateForm() {
     const [showToSuggestions, setShowToSuggestions] = useState(false);
     
     // Состояние для даты отправления
-    const [departureDate, setDepartureDate] = useState("");
+    const [departureDate, setDepartureDate] = useState(new Date(Date.now()).toISOString().split('T')[0]?.toString());
     
     // Добавляем состояния для остальных полей формы
     const [cargoWeight, setCargoWeight] = useState("");

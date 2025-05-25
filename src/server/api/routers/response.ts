@@ -6,15 +6,46 @@ export const responseRouter = createTRPCRouter({
   getByOrderId: protectedProcedure
     .input(z.object({ orderId: z.string() }))
     .query(async ({ ctx, input }) => {
+      // Если orderId === "all", возвращаем все отклики пользователя
+      if (input.orderId === "all") {
+        const responses = await ctx.db.response.findMany({
+          where: {
+            carrierId: ctx.session.user.id
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          include: {
+            carrier: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            order: {
+              select: {
+                userId: true,
+                number: true,
+                routeFrom: true,
+                routeTo: true,
+              },
+            },
+          },
+        });
+  
+        return responses;
+      }
+  
+      // Иначе продолжаем как обычно
       const order = await ctx.db.order.findUnique({
         where: { id: input.orderId },
         select: { userId: true },
       });
-
+  
       if (!order) {
         throw new Error("Заказ не найден");
       }
-
+  
       // Проверяем, что пользователь имеет доступ к этим откликам
       // (либо владелец заказа, либо перевозчик, который откликнулся)
       const responses = await ctx.db.response.findMany({
@@ -38,11 +69,14 @@ export const responseRouter = createTRPCRouter({
           order: {
             select: {
               userId: true,
+              number: true,
+              routeFrom: true,
+              routeTo: true,
             },
           },
         },
       });
-
+  
       return responses;
     }),
 
@@ -186,5 +220,47 @@ export const responseRouter = createTRPCRouter({
         updatedAt: response.updatedAt,
         lastMessage: response.messages[0] || null
       }));
+    }),
+
+  // Удаление отклика
+  deleteResponse: protectedProcedure
+    .input(z.object({ responseId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const response = await ctx.db.response.findUnique({
+        where: { id: input.responseId },
+        include: {
+          order: {
+            select: {
+              userId: true,
+            },
+          },
+        },
+      });
+
+      if (!response) {
+        throw new Error("Отклик не найден");
+      }
+
+      // Проверяем, что пользователь является владельцем отклика (перевозчиком)
+      if (response.carrierId !== ctx.session.user.id) {
+        throw new Error("У вас нет прав для удаления этого отклика");
+      }
+
+      // Проверяем, что отклик не был принят
+      if (response.status === "accepted") {
+        throw new Error("Нельзя удалить принятый отклик");
+      }
+
+      // Удаляем связанные сообщения
+      await ctx.db.message.deleteMany({
+        where: { responseId: input.responseId },
+      });
+
+      // Удаляем отклик
+      await ctx.db.response.delete({
+        where: { id: input.responseId },
+      });
+
+      return { success: true };
     }),
 });

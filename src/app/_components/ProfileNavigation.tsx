@@ -1,6 +1,6 @@
 'use client';
 
-import { FaUser, FaBox, FaTruck, FaHistory } from "react-icons/fa";
+import { FaUser, FaBox, FaTruck, FaHistory, FaComments } from "react-icons/fa";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
@@ -27,6 +27,12 @@ export default function ProfileNavigation() {
           className={`flex items-center py-2 px-3 ${pathname.startsWith('/profile/shipments') ? 'bg-gray-100 text-gray-800 font-medium' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'} rounded-md transition-colors`}
         >
           <FaTruck className="mr-3" /> Мои перевозки
+        </Link>
+        <Link 
+          href="/profile/responses" 
+          className={`flex items-center py-2 px-3 ${pathname.startsWith('/profile/responses') ? 'bg-gray-100 text-gray-800 font-medium' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'} rounded-md transition-colors`}
+        >
+          <FaComments className="mr-3" /> Мои отклики
         </Link>
         <Link 
           href="/profile/history" 

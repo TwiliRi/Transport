@@ -64,6 +64,7 @@ model User {
   sessions      Session[]
   posts         Post[]
   orders        Order[]
+  transports    Transport[]  // Добавляем связь с транспортом
   
   // Связи для чата
   responses     Response[] @relation("CarrierResponses")
@@ -93,7 +94,7 @@ model Order {
   imageUrl    String?  // Добавляем поле для URL изображения
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   // Связь с пользователем
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -135,6 +136,31 @@ model Message {
   // Связь с отправителем
   senderId  String
   sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+}
+
+
+model Transport {
+  id              String   @id @default(cuid())
+  title           String   // Название объявления
+  vehicleType     String   // Тип транспорта
+  carryingCapacity Float   // Грузоподъемность в тоннах
+  platformLength  Float?   // Длина платформы в метрах
+  platformWidth   Float?   // Ширина платформы в метрах
+  description     String?  // Описание
+  workPeriod      String   // Период работы
+  city            String   // Город
+  minOrderTime    String   // Минимальное время заказа
+  price           String   // Цена (может быть "договорная")
+  driverName      String   // Имя водителя
+  phoneNumber     String   // Номер телефона
+  imageUrl        String?  // URL изображения
+  status          String   @default("active") // active, inactive
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Связь с пользователем
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 

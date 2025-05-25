@@ -3,7 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 // Простой кэш для сообщений
 const messageCache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_TTL = 30000; // 30 секунд
+const CACHE_TTL = 60000; // Увеличиваем до 60 секунд
 
 export const messageRouter = createTRPCRouter({
   // Получение сообщений по ID отклика

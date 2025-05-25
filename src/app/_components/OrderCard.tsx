@@ -1,5 +1,5 @@
 "use client";
-import { FaTruck, FaBox, FaMapMarkerAlt, FaCalendar, FaMoneyBillWave, FaSearch, FaUser, FaSync, FaComments } from "react-icons/fa";
+import { FaTruck, FaBox, FaMapMarkerAlt, FaCalendar, FaMoneyBillWave, FaSearch, FaUser, FaSync, FaComments, FaBell } from "react-icons/fa";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -87,6 +87,8 @@ export default function OrderCard({ order }: { order: Order }) {
     const { data: session } = useSession();
     const [isOwner, setIsOwner] = useState(false);
     const [userResponse, setUserResponse] = useState<{ id: string; status: string } | null>(null);
+    const [hasNewMessages, setHasNewMessages] = useState(false);
+    const [lastCheckedMessageTime, setLastCheckedMessageTime] = useState<Date | null>(null);
     const router = useRouter();
     
     // Проверяем, является ли текущий пользователь владельцем заказа
@@ -114,6 +116,46 @@ export default function OrderCard({ order }: { order: Order }) {
         });
       }
     }, [responseData]);
+
+    // Получаем последние сообщения для проверки новых
+    const { data: messagesData } = api.message.getByResponseId.useQuery(
+      { responseId: userResponse?.id ?? '' },
+      { 
+        enabled: !!userResponse?.id && !showResponses,
+        refetchInterval: 10000 // Проверяем каждые 10 секунд
+      }
+    );
+
+    // Проверяем наличие новых сообщений
+    useEffect(() => {
+      if (messagesData && messagesData.length > 0) {
+        const latestMessageTime = new Date(messagesData[0].createdAt);
+        
+        // Если это первая проверка, запоминаем время последнего сообщения
+        if (!lastCheckedMessageTime) {
+          setLastCheckedMessageTime(latestMessageTime);
+          return;
+        }
+        
+        // Если есть сообщения новее, чем последняя проверка
+        if (latestMessageTime > lastCheckedMessageTime) {
+          // Проверяем, не от текущего ли пользователя последнее сообщение
+          if (messagesData[0].senderId !== session?.user.id) {
+            setHasNewMessages(true);
+          }
+        }
+      }
+    }, [messagesData, lastCheckedMessageTime, session?.user.id]);
+
+    // Сбрасываем индикатор новых сообщений при открытии чата
+    useEffect(() => {
+      if (showResponses && hasNewMessages) {
+        setHasNewMessages(false);
+        if (messagesData && messagesData.length > 0) {
+          setLastCheckedMessageTime(new Date(messagesData[0].createdAt));
+        }
+      }
+    }, [showResponses, hasNewMessages, messagesData]);
     
     // Функция для отображения статуса заказа
     const renderStatusBadge = (status: string) => {
@@ -217,11 +259,19 @@ export default function OrderCard({ order }: { order: Order }) {
               // Если пользователь откликнулся на заказ, показываем кнопку для просмотра чата
               <>
                 <button 
-                  className="w-full px-4 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors flex items-center justify-center min-w-[200px]"
+                  className="w-full px-4 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors flex items-center justify-center min-w-[200px] relative"
                   onClick={() => setShowResponses(!showResponses)}
                 >
                   <FaComments className="mr-2" />
                   {showResponses ? "Скрыть чат" : "Открыть чат"}
+                  
+                  {/* Индикатор новых сообщений */}
+                  {hasNewMessages && !showResponses && (
+                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                  )}
                 </button>
                 <button 
                   className="w-full px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors min-w-[200px]"
@@ -421,5 +471,4 @@ export default function OrderCard({ order }: { order: Order }) {
           )}
         </AnimatePresence>
       </div>
-    );
-  }
+    )}

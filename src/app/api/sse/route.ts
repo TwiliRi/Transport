@@ -1,8 +1,10 @@
 import { NextRequest } from "next/server";
 import { db } from "~/server/db";
 
-// Кэш для последних сообщений
+// Кэш для последних сообщений и данных
 const lastMessageTimestamps = new Map<string, Date>();
+const messagesCache = new Map<string, { data: any[]; timestamp: number }>();
+const CACHE_TTL = 30000; // 30 секунд
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -30,6 +32,24 @@ export async function GET(request: NextRequest) {
       // Настраиваем интервал для проверки новых сообщений
       const intervalId = setInterval(async () => {
         try {
+          // Проверяем кэш
+          const cacheKey = `sse:${responseId}`;
+          const cachedData = messagesCache.get(cacheKey);
+          const now = Date.now();
+          
+          // Если данные в кэше и они не устарели, используем их
+          if (cachedData && now - cachedData.timestamp < CACHE_TTL) {
+            // Отправляем только если есть сообщения
+            if (cachedData.data.length > 0) {
+              sendMessage({ 
+                type: "messages", 
+                data: cachedData.data,
+                cached: true
+              });
+            }
+            return;
+          }
+          
           // Получаем только новые сообщения с момента последней проверки
           const messages = await db.message.findMany({
             where: {
@@ -56,23 +76,32 @@ export async function GET(request: NextRequest) {
             lastTimestamp = messages[messages.length - 1]?.createdAt ?? lastTimestamp;
             lastMessageTimestamps.set(responseId, lastTimestamp);
             
+            // Форматируем сообщения
+            const formattedMessages = messages.map(msg => ({
+              id: msg.id,
+              content: msg.content,
+              createdAt: msg.createdAt,
+              senderId: msg.senderId,
+              senderName: msg.sender.name,
+            }));
+            
+            // Сохраняем в кэш
+            messagesCache.set(cacheKey, {
+              data: formattedMessages,
+              timestamp: now
+            });
+            
             // Отправляем только новые сообщения клиенту
             sendMessage({ 
               type: "messages", 
-              data: messages.map(msg => ({
-                id: msg.id,
-                content: msg.content,
-                createdAt: msg.createdAt,
-                senderId: msg.senderId,
-                senderName: msg.sender.name,
-              }))
+              data: formattedMessages
             });
           }
         } catch (error) {
           console.error("Ошибка при получении сообщений:", error);
           sendMessage({ type: "error", message: "Ошибка при получении сообщений" });
         }
-      }, 7000); // Проверяем каждые 7 секунды
+      }, 7000); // Проверяем каждые 7 секунд
 
       // Обработка закрытия соединения
       request.signal.addEventListener("abort", () => {

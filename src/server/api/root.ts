@@ -5,6 +5,7 @@ import { authRouter } from "~/server/api/routers/auth";
 import { orderRouter } from "~/server/api/routers/order";
 import { responseRouter } from "~/server/api/routers/response";
 import { messageRouter } from "~/server/api/routers/message";
+import { transportRouter } from "~/server/api/routers/transport";
 
 /**
  * This is the primary router for your server.
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   order: orderRouter,
   response: responseRouter,
   message: messageRouter,
+  transport: transportRouter,
 });
 
 // export type definition of API
