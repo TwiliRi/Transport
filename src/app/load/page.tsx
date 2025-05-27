@@ -16,7 +16,7 @@ type SortOption = 'date-desc' | 'date-asc' | 'price-desc' | 'price-asc' | 'route
 interface Order {
   id: string;
   number: string;
-  status: 'active' | 'completed' | 'cancelled';
+  status: 'active' | 'completed' | 'cancelled' | "processing";
   date: string;
   route: {
     from: string;

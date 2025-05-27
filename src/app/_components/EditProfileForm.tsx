@@ -160,7 +160,7 @@ export default function EditProfileForm({ initialData, userId }: EditProfileForm
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-black focus:border-black sm:text-sm"
-              placeholder="+7 (999) 123-45-67"
+              placeholder="+7 999 999 99 99"
             />
           </div>
         </div>

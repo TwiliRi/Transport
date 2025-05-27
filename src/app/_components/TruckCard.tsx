@@ -74,13 +74,19 @@ export default function TruckCard({ transport }: TruckCardProps) {
        max-[700px]:items-center justify-between flex space-x-4
        bg-white border border-gray-200 rounded-lg shadow-md p-4 sm:p-6 ">
               <div className="flex-shrink-0">
-                  <Image 
-                    src={transport.imageUrl ? transport.imageUrl : Car} 
-                    alt={transport.title} 
-                    width={192}
-                    height={192}
-                    className="rounded-lg w-48 h-48 object-cover"
-                  />
+                  {transport.imageUrl ? (
+                      <Image 
+                        src={transport.imageUrl}
+                        alt={transport.title} 
+                        width={192}
+                        height={192}
+                        className="rounded-lg w-48 h-48 object-cover"
+                      />
+                  ) : (
+                      <div className="w-48 h-48 flex items-center justify-center bg-gray-200 rounded-lg">
+                          <FaTruck className="text-gray-500 text-6xl" />
+                      </div>
+                  )}
                       
                   <div className="text-sm text-gray-500 mt-2">
                     <FaCalendar className="inline mr-1" /> Дата создания: {createdAtFormatted}
@@ -102,7 +108,7 @@ export default function TruckCard({ transport }: TruckCardProps) {
                   <div className="mt-4">
                   <div className="flex text-sm text-gray-800">
                       <div className="w-48">
-                        <FaWeight className="inline mr-1" /> Грузоподъёмность, т
+                        <FaWeight className="inline mr-1" /> Грузоподъёмность, кг
                       </div>
                       <div>- {transport.carryingCapacity}</div>
                   </div>

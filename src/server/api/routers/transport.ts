@@ -6,7 +6,7 @@ export const transportRouter = createTRPCRouter({
     .input(z.object({
       title: z.string().min(1, "Название обязательно"),
       vehicleType: z.string().min(1, "Тип транспорта обязателен"),
-      carryingCapacity: z.number().min(0.1, "Грузоподъемность должна быть больше 0"),
+      carryingCapacity: z.number().min(100, "Грузоподъемность должна быть больше 100 кг"), // Изменено на кг
       platformLength: z.number().optional(),
       platformWidth: z.number().optional(),
       description: z.string().optional(),
@@ -57,14 +57,14 @@ export const transportRouter = createTRPCRouter({
       
       if (input?.minCapacity) {
         whereClause.carryingCapacity = {
-          gte: input.minCapacity,
+          gte: input.minCapacity, // minCapacity теперь ожидается в кг
         };
       }
       
       if (input?.maxCapacity) {
         whereClause.carryingCapacity = {
           ...whereClause.carryingCapacity,
-          lte: input.maxCapacity,
+          lte: input.maxCapacity, // maxCapacity теперь ожидается в кг
         };
       }
       

@@ -136,7 +136,7 @@ export default function Search(){
                             type="tel"
                             pattern="^\+?[0-9]{10,11}$"
                             className="w-full px-3 py-2 bg-[#D9D9D9]"
-                            placeholder="+7 (999) 999-99-99"
+                            placeholder="+7 999 999 99 99"
                             required
                             maxLength={12}
                         />

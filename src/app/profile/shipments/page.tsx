@@ -4,13 +4,13 @@ import { useState, useEffect } from "react";
 import { FaTruck, FaCalendar, FaMapMarkerAlt, FaBox, FaMoneyBillWave } from "react-icons/fa";
 
 // Типы для перевозок
-type ShipmentStatus = 'active' | 'completed' | 'cancelled' | '';
+type ShipmentStatus = 'active' | 'completed' | 'cancelled' | 'processing' | '';
 type SortOption = 'date-desc' | 'date-asc' | 'price-desc' | 'price-asc' | '';
 
 interface Shipment {
   id: string;
   number: string;
-  status: 'active' | 'completed' | 'cancelled';
+  status: 'active' | 'completed' | 'cancelled' | "processing";
   date: string;
   vehicleType: string;
   vehicleCapacity: string;

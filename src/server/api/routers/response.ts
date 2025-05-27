@@ -140,30 +140,58 @@ export const responseRouter = createTRPCRouter({
         include: {
           order: {
             select: {
+              id: true, // Добавляем id заказа
               userId: true,
             },
           },
         },
       });
-
+  
       if (!response) {
         throw new Error("Отклик не найден");
       }
-
+  
       // Проверяем, что пользователь является владельцем заказа
       if (response.order.userId !== ctx.session.user.id) {
         throw new Error("У вас нет прав для изменения статуса этого отклика");
       }
-
-      // Обновляем статус отклика
-      const updatedResponse = await ctx.db.response.update({
-        where: { id: input.responseId },
-        data: {
-          status: input.status,
-        },
+  
+      // Используем транзакцию для одновременного обновления отклика и заказа
+      const result = await ctx.db.$transaction(async (prisma) => {
+        // Обновляем статус отклика
+        const updatedResponse = await prisma.response.update({
+          where: { id: input.responseId },
+          data: {
+            status: input.status,
+          },
+        });
+  
+        // Если отклик принят, меняем статус заказа на "processing"
+        if (input.status === "accepted") {
+          await prisma.order.update({
+            where: { id: response.order.id }, // Используем ID заказа
+            data: {
+              status: "processing",
+            },
+          });
+  
+          // Отклоняем все остальные отклики на этот заказ
+          await prisma.response.updateMany({
+            where: {
+              orderId: response.orderId, // Используем ID заказа из отклика
+              id: { not: input.responseId },
+              status: "pending",
+            },
+            data: {
+              status: "rejected",
+            },
+          });
+        }
+  
+        return updatedResponse;
       });
-
-      return updatedResponse;
+  
+      return result;
     }),
 
   // Получение обновлений для отклика (для SSE)

@@ -254,7 +254,7 @@ export default function TransportUploadForm() {
                 value={formData.phoneNumber}
                 onChange={handleChange}
                 pattern="^\+?[0-9]{10,11}$"
-                placeholder="+7 (999) 999-99-99"
+                placeholder="+7 999 999 99 99"
                 className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
                 required
                 maxLength={12}
@@ -281,16 +281,22 @@ export default function TransportUploadForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Грузоподъёмность (тонн)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Грузоподъёмность (кг)</label>
               <input
                 type="number"
                 name="carryingCapacity"
-                value={formData.carryingCapacity || ''}
-                onChange={handleChange}
+                value={formData.carryingCapacity || ''} // Теперь значение хранится и отображается в кг
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value);
+                  setFormData({
+                    ...formData,
+                    carryingCapacity: value || 0 // Сохраняем в кг
+                  });
+                }}
                 min="0"
-                max="100"
-                step="0.1"
-                placeholder="1.5"
+                max="100000" // Максимальное значение в кг
+                step="100" // Шаг в кг
+                placeholder="1500" // Пример в кг
                 className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
                 required
               />

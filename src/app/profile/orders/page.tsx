@@ -44,7 +44,7 @@ export default async function OrdersPage() {
   const formattedOrders = orders.map(order => ({
     id: order.id,
     number: order.number,
-    status: order.status as 'active' | 'completed' | 'cancelled',
+    status: order.status as 'active' | 'completed' | 'cancelled' | "processing",
     date: formatDate(order.date),
     route: {
       from: order.routeFrom,

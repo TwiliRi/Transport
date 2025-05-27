@@ -16,7 +16,7 @@ import Chat from "./Chat";
 interface Order {
     id: string;
     number: string;
-    status: 'active' | 'completed' | 'cancelled';
+    status: 'active' | 'completed' | 'cancelled' | "processing";
     date: string;
     route: {
       from: string;
@@ -91,6 +91,14 @@ export default function OrderCard({ order }: { order: Order }) {
     const [lastCheckedMessageTime, setLastCheckedMessageTime] = useState<Date | null>(null);
     const router = useRouter();
     
+    // Добавляем состояние для хранения информации о принятом отклике
+    const [acceptedResponse, setAcceptedResponse] = useState<{
+      id: string;
+      carrierId: string;
+      carrierName: string;
+      status: string;
+    } | null>(null);
+    
     // Проверяем, является ли текущий пользователь владельцем заказа
     useEffect(() => {
       if (session && order.user) {
@@ -106,6 +114,30 @@ export default function OrderCard({ order }: { order: Order }) {
         refetchInterval: false
       }
     );
+    
+    // Получаем принятый отклик для заказа (только для владельца заказа)
+    const { data: acceptedResponseData } = api.response.getByOrderId.useQuery(
+      { orderId: order.id },
+      { 
+        enabled: !!session && !!order.id && isOwner,
+        refetchInterval: false
+      }
+    );
+    
+    // Обновляем информацию о принятом отклике
+    useEffect(() => {
+      if (acceptedResponseData && acceptedResponseData.length > 0) {
+        const accepted = acceptedResponseData.find(resp => resp.status === 'accepted');
+        if (accepted) {
+          setAcceptedResponse({
+            id: accepted.id,
+            carrierId: accepted.carrierId,
+            carrierName: accepted.carrier.name || 'Перевозчик',
+            status: accepted.status
+          });
+        }
+      }
+    }, [acceptedResponseData]);
     
     // Обновляем информацию об отклике пользователя
     useEffect(() => {
@@ -158,6 +190,7 @@ export default function OrderCard({ order }: { order: Order }) {
     }, [showResponses, hasNewMessages, messagesData]);
     
     // Функция для отображения статуса заказа
+    // В функции renderStatusBadge добавляем обработку статуса "processing"
     const renderStatusBadge = (status: string) => {
       switch (status) {
         case 'completed':
@@ -165,7 +198,7 @@ export default function OrderCard({ order }: { order: Order }) {
         case 'active':
           return <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Активен</span>;
         case 'processing':
-          return <span className="bg-blue-100 text-blue-500 text-xs font-medium px-2.5 py-0.5 rounded">Обработка</span>;
+          return <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2.5 py-0.5 rounded">Выполняется</span>;
         case 'cancelled':
           return <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">Отменен</span>;
         default:
@@ -409,6 +442,27 @@ export default function OrderCard({ order }: { order: Order }) {
                     </div>
                   </div>
                 )}
+                {acceptedResponse && order.status === 'processing' && (
+          <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+            <h5 className="font-semibold mb-2 flex items-center">
+              <FaTruck className="mr-2 text-gray-500" /> Перевозчик:
+            </h5>
+            <div className="flex justify-between items-center">
+              <p className="text-gray-700">{acceptedResponse.carrierName}</p>
+              <Link 
+                href={`/users/${acceptedResponse.carrierId}`}
+                className="text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded-md transition-colors"
+              >
+                Профиль
+              </Link>
+            </div>
+            <div className="mt-2">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                Принят
+              </span>
+            </div>
+          </div>
+        )}
                 {order.imageUrl && (
                   <div className="mb-4">
                     <img 

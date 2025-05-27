@@ -7,30 +7,30 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 interface Order {
+  id: string;
+  number: string;
+  status: 'active' | 'completed' | 'cancelled' | "processing" ;
+  date: string;
+  route: {
+    from: string;
+    to: string;
+  };
+  price: number;
+  cargo: {
+    type: string;
+    weight: string;
+  };
+  transportType?: {
+    value: string;
+    label: string;
+  };
+  imageUrl?: string; // Добавляем опциональное поле для URL изображения
+  description?: string; 
+  user?: {
     id: string;
-    number: string;
-    status: 'active' | 'completed' | 'cancelled';
-    date: string;
-    route: {
-      from: string;
-      to: string;
-    };
-    price: number;
-    cargo: {
-      type: string;
-      weight: string;
-    };
-    transportType?: {
-      value: string;
-      label: string;
-    };
-    imageUrl?: string; // Добавляем опциональное поле для URL изображения
-    description?: string; 
-    user?: {
-      id: string;
-      name: string;
-    };
-  }
+    name: string;
+  };
+}
 
 interface EditOrderFormProps {
   order: Order;
@@ -324,11 +324,12 @@ export default function EditOrderForm({ order, onClose }: EditOrderFormProps) {
           <div className="relative">
             <select
               value={status}
-              onChange={(e) => setStatus(e.target.value as 'active' | 'completed' | 'cancelled')}
+              onChange={(e) => setStatus(e.target.value as 'active' | 'completed' | 'cancelled' | "processing")}
               className="w-full py-2 px-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
               required
             >
               <option value="active">Активен</option>
+              <option value="processing">Выполняется</option>
               <option value="completed">Завершен</option>
               <option value="cancelled">Отменен</option>
             </select>
