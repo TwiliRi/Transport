@@ -1,260 +1,615 @@
-import Individual1 from "~/public/individual1.png";
-import Individual2 from "~/public/individual2.png";
-import Individual3 from "~/public/individual3.png";
-import Big from "~/public/big.png";
-import Security1 from "~/public/security1.png";
-import Security2 from "~/public/security2.png";
-import Security3 from "~/public/security3.png";
-import Boxes from "~/public/boxes.png";
-import Cars from "~/public/cars.png";
-import Image from "next/image";
-import Link from "next/link";
-import { FaTruck, FaBoxOpen, FaShieldAlt, FaUserFriends } from "react-icons/fa";
+"use client";
 
-export default function Home() {
-  const scrollTo = (distance: number) => {
-    window.scrollBy({
-      top: distance,
-      left: 0,
-      behavior: 'smooth',
-    });
-  };
-  
-  return (
-    <>
-      
-      <section className="relative bg-gradient-to-b from-gray-50 to-white py-12 md:py-20">
-        <div className="max-w-[1366px] mx-auto px-4 sm:px-5 flex flex-col items-center">
-          <div className="text-center mb-8 md:mb-12">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 md:mb-4">Грузоперевозки для всех задач</h1>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-2 sm:px-0">
-              Надежная доставка грузов по всей России. Быстро, безопасно, выгодно.
-            </p>
-          </div>
-          
-          <div className="flex justify-center gap-4 sm:gap-8 mb-8 md:mb-12 flex-wrap">
-            <Link href="/load" className="group w-full sm:w-auto max-w-[280px]">
-              <div className="bg-white hover:bg-black text-black hover:text-white
-               transition-colors duration-300 shadow-lg rounded-lg p-6 sm:p-8 w-full sm:w-[280px]
-                text-center border border-gray-100 group-hover:border-black">
-                <FaBoxOpen className="text-4xl sm:text-5xl mx-auto mb-3 sm:mb-4 text-black
-                 group-hover:text-white transition-colors duration-300" />
-                <h3 className="text-xl sm:text-2xl font-semibold mb-1 sm:mb-2">Найти грузы</h3>
-                <p className="text-gray-600 group-hover:text-gray-200 
-                transition-colors duration-300">Для перевозчиков</p>
-              </div>
-            </Link>
-            
-            <Link href="/search?type=transport" className="group w-full sm:w-auto max-w-[280px]">
-              <div className="bg-white hover:bg-black text-black hover:text-white
-               transition-colors duration-300 shadow-lg rounded-lg p-6 sm:p-8 w-full 
-               sm:w-[280px] text-center border border-gray-100 group-hover:border-black">
-                <FaTruck className="text-4xl sm:text-5xl mx-auto mb-3 sm:mb-4 text-black
-                 group-hover:text-white transition-colors duration-300" />
-                <h3 className="text-xl sm:text-2xl font-semibold mb-1 sm:mb-2">Найти машину</h3>
-                <p className="text-gray-600 group-hover:text-gray-200 
-                transition-colors duration-300">Для грузоотправителей</p>
-              </div>
-            </Link>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row justify-between items-center w-full
-           max-w-4xl mt-4 sm:mt-8 gap-6 sm:gap-0">
-            <div className="w-full sm:w-1/2 flex justify-center">
-              <Image 
-                
-                src={Boxes} 
-                className="max-w-full sm:max-w-[90%] md:max-w-[400px] max-h-[200px] 
-                sm:max-h-[300px] object-contain transform hover:scale-105 transition-transform
-                 duration-300" 
-                alt="Грузы" 
-              />
-            </div>
-            <div className="w-full sm:w-1/2 flex justify-center">
-              <Image 
-                src={Cars} 
-                className="max-w-full sm:max-w-[90%] md:max-w-[400px] max-h-[200px]
-                 sm:max-h-[300px] object-contain transform hover:scale-105 
-                 transition-transform duration-300" 
-                alt="Транспорт" 
-              />
-            </div>
-          </div>
-        </div>
-        
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r 
-        from-transparent via-black to-transparent opacity-20"></div>
-      </section>
-      
-      {/* О нас */}
-      <section className="py-12 md:py-20 bg-white">
-        <div className="max-w-[1366px] mx-auto px-4 sm:px-5">
-          <div className="text-center mb-10 md:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3 md:mb-4">О нашей платформе</h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-2 sm:px-0">
-              Мы — динамично развивающаяся компания, специализирующаяся на предоставлении
-               высококачественных услуг в области перевозок.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mb-12 md:mb-20">
-            <div className="bg-gray-50 rounded-lg p-6 sm:p-8 shadow-sm hover:shadow-md 
-            transition-shadow duration-300 flex flex-col items-center text-center">
-              <FaUserFriends className="text-3xl sm:text-4xl mb-3 sm:mb-4 text-black" />
-              <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Индивидуальный подход</h3>
-              <p className="text-gray-600">
-                Каждый клиент для нас важен. Мы разрабатываем оптимальные маршруты,
-                учитываем специфику вашего груза и предоставляем персонализированные решения.
-              </p>
-            </div>
-            
-            <div className="bg-gray-50 rounded-lg p-6 sm:p-8 shadow-sm hover:shadow-md 
-            transition-shadow duration-300 flex flex-col items-center text-center">
-              <FaTruck className="text-3xl sm:text-4xl mb-3 sm:mb-4 text-black" />
-              <h3 className="text-lg sm:text-xl font-semibold
-               mb-2 sm:mb-3">Огромный автопарк</h3>
-              <p className="text-gray-600">
-                Наш автопарк состоит из современных автомобилей различной грузоподъемности.
-                 Это позволяет нам перевозить грузы любых размеров и типов.
-              </p>
-            </div>
-            
-            <div className="bg-gray-50 rounded-lg p-6 sm:p-8 shadow-sm hover:shadow-md 
-            transition-shadow duration-300 flex flex-col items-center text-center
-             sm:col-span-2 md:col-span-1 sm:max-w-md sm:mx-auto md:max-w-none">
-              <FaShieldAlt className="text-3xl sm:text-4xl mb-3 sm:mb-4 text-black" />
-              <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Безопасность</h3>
-              <p className="text-gray-600">
-                Каждый водитель тщательно следит за техническим состоянием автомобилей,
-                 а также соблюдает все нормы и стандарты безопасности.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Преимущества с изображениями */}
-      <section className="py-12 md:py-20 bg-gray-50">
-        <div className="max-w-[1366px] mx-auto px-4 sm:px-5">
-          <div className="text-center mb-10 md:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3 md:mb-4">Почему выбирают нас?</h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-2 sm:px-0">
-              Наши преимущества, которые делают нас лидерами в сфере грузоперевозок
-            </p>
-          </div>
-          
-          
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 mb-16 md:mb-24">
-            <div className="w-full md:w-1/2">
-              <h3 className="text-xl sm:text-2xl font-bold mb-3 md:mb-4">Индивидуальный подход</h3>
-              <p className="text-base sm:text-lg text-gray-600 mb-4 md:mb-6">
-                Каждый клиент для нас важен. Мы разрабатываем оптимальные маршруты,
-                 учитываем специфику вашего груза и предоставляем персонализированные решения.
-              </p>
-              <ul className="space-y-2">
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-black rounded-full mr-2"></span>
-                  <span>Персональный менеджер</span>
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-black rounded-full mr-2"></span>
-                  <span>Оптимальные маршруты</span>
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-black rounded-full mr-2"></span>
-                  <span>Учет специфики груза</span>
-                </li>
-              </ul>
-            </div>
-            <div className="w-full md:w-1/2 relative h-[300px] md:h-[400px] mt-6 md:mt-0">
-              <Image src={Individual1} alt="Индивидуальный подход" 
-              className="absolute top-0 right-0 w-[60%] md:w-[250px] rounded-lg
-               shadow-lg transform hover:scale-105 transition-transform duration-300" />
-              <Image src={Individual2} alt="Индивидуальный подход" 
-              className="absolute bottom-0 left-0 w-[60%] md:w-[250px] rounded-lg 
-              shadow-lg transform hover:scale-105 transition-transform duration-300" />
-              <Image src={Individual3} alt="Индивидуальный подход" 
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 
-              -translate-y-1/2 w-[60%] md:w-[250px] rounded-lg shadow-lg 
-              hover:scale-105 transition-transform duration-300" />
-            </div>
-          </div>
-          
-          {/* Огромный автопарк */}
-          <div className="flex flex-col md:flex-row-reverse items-center justify-between gap-8 md:gap-12 mb-16 md:mb-24">
-            <div className="w-full md:w-1/2">
-              <h3 className="text-xl sm:text-2xl font-bold mb-3 md:mb-4">Огромный автопарк</h3>
-              <p className="text-base sm:text-lg text-gray-600 mb-4 md:mb-6">
-                Наш автопарк состоит из современных автомобилей различной грузоподъемности. Это позволяет нам перевозить грузы любых размеров и типов – от небольших посылок до крупногабаритных грузов.
-              </p>
-              <ul className="space-y-2">
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-black rounded-full mr-2"></span>
-                  <span>Современные автомобили</span>
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-black rounded-full mr-2"></span>
-                  <span>Различная грузоподъемность</span>
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-black rounded-full mr-2"></span>
-                  <span>Регулярное техобслуживание</span>
-                </li>
-              </ul>
-            </div>
-            <div className="w-full md:w-1/2 flex justify-center mt-6 md:mt-0">
-              <Image src={Big} alt="Огромный автопарк" className="max-w-full sm:max-w-[80%] md:max-w-full rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300" />
-            </div>
-          </div>
-          
-          {/* Безопасность */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
-            <div className="w-full md:w-1/2">
-              <h3 className="text-xl sm:text-2xl font-bold mb-3 md:mb-4">Безопасность</h3>
-              <p className="text-base sm:text-lg text-gray-600 mb-4 md:mb-6">
-                Каждый водитель тщательно следит за техническим состоянием автомобилей, а также соблюдает все нормы и стандарты, чтобы ваш груз прибыл в целости и сохранности.
-              </p>
-              <ul className="space-y-2">
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-black rounded-full mr-2"></span>
-                  <span>Опытные водители</span>
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-black rounded-full mr-2"></span>
-                  <span>Страхование грузов</span>
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-black rounded-full mr-2"></span>
-                  <span>GPS-мониторинг</span>
-                </li>
-              </ul>
-            </div>
-            <div className="w-full md:w-1/2 grid grid-cols-2 gap-3 sm:gap-4 mt-6 md:mt-0">
-              <Image src={Security3} alt="Безопасность" className="rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300" />
-              <Image src={Security1} alt="Безопасность" className="rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300" />
-              <Image src={Security2} alt="Безопасность" className="rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 col-span-2" />
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Призыв к действию */}
-      <section className="py-12 md:py-16 bg-black text-white">
-        <div className="max-w-[1366px] mx-auto px-4 sm:px-5 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4 md:mb-6">Готовы начать работу с нами?</h2>
-          <p className="text-base sm:text-xl mb-6 md:mb-8 max-w-2xl mx-auto px-2 sm:px-0">
-            Присоединяйтесь к тысячам довольных клиентов, которые уже оценили качество наших услуг
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaTruck, FaBox, FaMapMarkerAlt, FaUsers, FaShieldAlt, FaClock, FaArrowRight, FaPlay, FaPause } from "react-icons/fa";
+import Link from "next/link";
+import Image from "next/image";
+
+export default function HomePage() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAutoPlay, setIsAutoPlay] = useState(true);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Данные для слайдов с более тёмными цветами
+  const slides = [
+    {
+      id: 1,
+      title: "ТРАНСПОРТ",
+      subtitle: "БУДУЩЕГО",
+      description: "Революционная платформа для логистики и грузоперевозок",
+      background: "linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #000000 100%)",
+      textColor: "white"
+    },
+    {
+      id: 2,
+      title: "НАДЁЖНОСТЬ",
+      subtitle: "И СКОРОСТЬ",
+      description: "Доставляем ваши грузы быстро и безопасно по всей стране",
+      background: "linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 50%, #f0f0f0 100%)",
+      textColor: "#000000"
+    },
+    {
+      id: 3,
+      title: "ИННОВАЦИИ",
+      subtitle: "В ЛОГИСТИКЕ",
+      description: "Современные технологии для эффективного управления перевозками",
+      background: "linear-gradient(135deg, #000000 0%, #111111 50%, #000000 100%)",
+      textColor: "white"
+    }
+  ];
+
+  // Статистика
+  const stats = [
+    { number: "10K+", label: "Довольных клиентов", icon: FaUsers },
+    { number: "50K+", label: "Успешных доставок", icon: FaBox },
+    { number: "500+", label: "Единиц транспорта", icon: FaTruck },
+    { number: "24/7", label: "Поддержка клиентов", icon: FaClock }
+  ];
+
+  // Услуги
+  const services = [
+    {
+      icon: FaTruck,
+      title: "Грузоперевозки",
+      description: "Перевозка грузов любого типа и размера"
+    },
+    {
+      icon: FaMapMarkerAlt,
+      title: "Логистика",
+      description: "Планирование и оптимизация маршрутов"
+    },
+    {
+      icon: FaShieldAlt,
+      title: "Безопасность",
+      description: "Полное страхование и контроль груза"
+    }
+  ];
+
+  // Фиксированные частицы для предотвращения проблем с гидратацией
+  const staticParticles = [
+    { id: 0, x: 10, y: 20, size: 2, duration: 15 },
+    { id: 1, x: 80, y: 10, size: 3, duration: 18 },
+    { id: 2, x: 30, y: 70, size: 1.5, duration: 12 },
+    { id: 3, x: 60, y: 40, size: 2.5, duration: 20 },
+    { id: 4, x: 90, y: 80, size: 1.8, duration: 16 },
+    { id: 5, x: 15, y: 60, size: 2.2, duration: 14 },
+    { id: 6, x: 70, y: 25, size: 1.3, duration: 17 },
+    { id: 7, x: 40, y: 90, size: 2.8, duration: 13 },
+    { id: 8, x: 85, y: 50, size: 1.6, duration: 19 },
+    { id: 9, x: 25, y: 35, size: 2.4, duration: 11 }
+  ];
+
+  // Проверка монтирования компонента
+  useEffect(() => {
+    setIsMounted(true);
+    setIsLoaded(true);
+  }, []);
+
+  // Автоматическая смена слайдов
+  useEffect(() => {
+    if (isAutoPlay && isMounted) {
+      const interval = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+      }, 10000); // Увеличено с 5000 до 8000 миллисекунд (8 секунд)
+      return () => clearInterval(interval);
+    }
+  }, [isAutoPlay, slides.length, isMounted]);
+
+  // Отслеживание позиции мыши только на клиенте
+  useEffect(() => {
+    if (!isMounted) return;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [isMounted]);
+
+  const currentSlideData = slides[currentSlide];
+
+  // Показываем базовую версию до монтирования
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: slides[0]?.background || 'black' }}>
+        <div className="text-center px-4">
+          <h1 className="text-8xl md:text-9xl font-black mb-4 tracking-wider text-white">
+            {slides[0]?.title}
+          </h1>
+          <h2 className="text-6xl md:text-7xl font-light mb-6 tracking-widest text-white">
+            {slides[0]?.subtitle}
+          </h2>
+          <p className="text-xl md:text-2xl font-light max-w-2xl mx-auto opacity-80 text-white">
+            {slides[0]?.description}
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 flex-wrap">
-            <Link href="/registration" className="bg-white text-black py-3 px-6 sm:px-8 rounded-md font-semibold hover:bg-gray-200 transition-colors duration-300 w-full sm:w-auto">
-              Зарегистрироваться
-            </Link>
-            <Link href="/search" className="bg-transparent border-2 border-white text-white py-3 px-6 sm:px-8 rounded-md font-semibold hover:bg-white hover:text-black transition-colors duration-300 w-full sm:w-auto">
-              Найти перевозчика
-            </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen overflow-hidden">
+      {/* Главный слайдер */}
+      <AnimatePresence mode="wait">
+        <motion.section
+          key={currentSlide}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1 }}
+          className="relative h-screen flex items-center justify-center"
+          style={{ background: currentSlideData?.background }}
+        >
+          {/* Анимированный фон с частицами */}
+          <div className="absolute inset-0 overflow-hidden">
+            {/* Статичные плавающие частицы */}
+            {staticParticles.map((particle) => (
+              <motion.div
+                key={particle.id}
+                className="absolute rounded-full opacity-20"
+                style={{
+                  left: `${particle.x}%`,
+                  top: `${particle.y}%`,
+                  width: `${particle.size}px`,
+                  height: `${particle.size}px`,
+                  backgroundColor: currentSlideData?.textColor
+                }}
+                animate={{
+                  y: [-20, 20, -20],
+                  x: [-10, 10, -10],
+                  opacity: [0.1, 0.3, 0.1],
+                  scale: [1, 1.2, 1]
+                }}
+                transition={{
+                  duration: particle.duration,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+            ))}
+
+            {/* Волновые анимации без зависимости от mousePosition */}
+            <motion.div
+              className="absolute inset-0"
+              style={{
+                background: `radial-gradient(circle at 50% 50%, ${currentSlideData?.textColor}10 0%, transparent 50%)`
+              }}
+              animate={{
+                opacity: [0.3, 0.6, 0.3]
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+
+            {/* Геометрические волны */}
+            <motion.div
+              className="absolute top-0 left-0 w-full h-full"
+              style={{
+                background: `linear-gradient(45deg, transparent 30%, ${currentSlideData?.textColor}05 50%, transparent 70%)`
+              }}
+              animate={{
+                backgroundPosition: ['0% 0%', '100% 100%', '0% 0%']
+              }}
+              transition={{
+                duration: 15,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            />
+
+            {/* Пульсирующие кольца */}
+            <motion.div
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+              animate={{
+                scale: [1, 2, 1],
+                opacity: [0.1, 0.3, 0.1]
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <div 
+                className="w-96 h-96 rounded-full border-2 opacity-20"
+                style={{ borderColor: currentSlideData?.textColor }}
+              />
+            </motion.div>
+
+            <motion.div
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+              animate={{
+                scale: [1.5, 3, 1.5],
+                opacity: [0.05, 0.2, 0.05]
+              }}
+              transition={{
+                duration: 12,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 2
+              }}
+            >
+              <div 
+                className="w-96 h-96 rounded-full border opacity-10"
+                style={{ borderColor: currentSlideData?.textColor }}
+              />
+            </motion.div>
+
+            {/* Движущиеся линии */}
+            <motion.div
+              className="absolute inset-0"
+              animate={{
+                backgroundImage: [
+                  `linear-gradient(90deg, transparent 0%, ${currentSlideData?.textColor}20 50%, transparent 100%)`,
+                  `linear-gradient(90deg, transparent 100%, ${currentSlideData?.textColor}20 50%, transparent 0%)`
+                ]
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            />
+
+            {/* Геометрические фигуры с улучшенными анимациями */}
+            <motion.div
+              animate={{
+                rotate: 360,
+                scale: [1, 1.3, 1],
+                opacity: [0.1, 0.3, 0.1]
+              }}
+              transition={{
+                duration: 25,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+              className="absolute top-20 left-20 w-40 h-40 border-2 border-current opacity-10"
+              style={{ borderColor: currentSlideData?.textColor }}
+            />
+            
+            <motion.div
+              animate={{
+                rotate: -360,
+                x: [0, 80, 0],
+                y: [0, -50, 0],
+                scale: [1, 1.2, 1]
+              }}
+              transition={{
+                duration: 18,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="absolute bottom-20 right-20 w-32 h-32 rounded-full border-2 border-current opacity-15"
+              style={{ borderColor: currentSlideData?.textColor }}
+            />
+            
+            <motion.div
+              animate={{
+                rotate: [0, 180, 360],
+                scale: [1, 0.7, 1],
+                opacity: [0.1, 0.4, 0.1]
+              }}
+              transition={{
+                duration: 14,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="absolute top-1/2 left-10 w-24 h-24 transform -translate-y-1/2"
+              style={{
+                background: `conic-gradient(from 0deg, transparent 30%, ${currentSlideData?.textColor}30 50%, transparent 70%)`
+              }}
+            />
+
+            {/* Дополнительные декоративные элементы */}
+            <motion.div
+              className="absolute top-1/4 right-1/4 w-16 h-16"
+              animate={{
+                rotate: [0, 360],
+                scale: [1, 1.5, 1]
+              }}
+              transition={{
+                duration: 10,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+              style={{
+                background: `linear-gradient(45deg, ${currentSlideData?.textColor}20, transparent)`
+              }}
+            />
+
+            <motion.div
+              className="absolute bottom-1/4 left-1/4 w-20 h-20 rounded-full"
+              animate={{
+                scale: [1, 2, 1],
+                opacity: [0.1, 0.3, 0.1]
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1
+              }}
+              style={{
+                background: `radial-gradient(circle, ${currentSlideData?.textColor}30 0%, transparent 70%)`
+              }}
+            />
+          </div>
+
+          {/* Контент слайда */}
+          <div className="relative z-10 text-center px-4">
+            <motion.div
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 1, delay: 0.2 }}
+              className="mb-8"
+            >
+              <motion.h1
+                className="text-8xl md:text-9xl font-black mb-4 tracking-wider"
+                style={{ color: currentSlideData?.textColor }}
+                animate={{
+                  textShadow: [
+                    `0 0 30px ${currentSlideData?.textColor}60`,
+                    `0 0 60px ${currentSlideData?.textColor}30`,
+                    `0 0 30px ${currentSlideData?.textColor}60`
+                  ]
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
+              >
+                {currentSlideData?.title}
+              </motion.h1>
+              <motion.h2
+                className="text-6xl md:text-7xl font-light mb-6 tracking-widest"
+                style={{ color: currentSlideData?.textColor }}
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1, delay: 0.5 }}
+              >
+                {currentSlideData?.subtitle}
+              </motion.h2>
+              <motion.p
+                className="text-xl md:text-2xl font-light max-w-2xl mx-auto opacity-80"
+                style={{ color: currentSlideData?.textColor }}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 0.8, y: 0 }}
+                transition={{ duration: 1, delay: 0.8 }}
+              >
+                {currentSlideData?.description}
+              </motion.p>
+            </motion.div>
+
+            {/* Кнопки действий */}
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 1, delay: 1.2 }}
+              className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+            >
+              <Link href="/load">
+                <motion.button
+                  className="group relative px-12 py-4 text-lg font-bold tracking-wider overflow-hidden"
+                  style={{
+                    backgroundColor: currentSlideData?.textColor,
+                    color: currentSlideData?.textColor === 'white' ? '#000000' : '#ffffff'
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <span className="relative z-10 flex items-center gap-3">
+                    НАЙТИ ГРУЗ
+                    <FaArrowRight className="group-hover:translate-x-2 transition-transform" />
+                  </span>
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    initial={{ x: '-100%' }}
+                    whileHover={{ x: '100%' }}
+                    transition={{ duration: 0.6 }}
+                  />
+                </motion.button>
+              </Link>
+              <Link href="/search">
+                <motion.button
+                  className="group px-12 py-4 text-lg font-bold tracking-wider border-2 bg-transparent"
+                  style={{
+                    borderColor: currentSlideData?.textColor,
+                    color: currentSlideData?.textColor
+                  }}
+                  whileHover={{
+                    backgroundColor: currentSlideData?.textColor,
+                    color: currentSlideData?.textColor === 'white' ? '#000000' : '#ffffff'
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <span className="flex items-center gap-3">
+                    НАЙТИ ТРАНСПОРТ
+                    <FaTruck className="group-hover:translate-x-2 transition-transform" />
+                  </span>
+                </motion.button>
+              </Link>
+            </motion.div>
+          </div>
+
+          {/* Навигация слайдов */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-4">
+            {slides.map((_, index) => (
+              <motion.button
+                key={index}
+                className="w-4 h-4 rounded-full border-2"
+                style={{
+                  backgroundColor: index === currentSlide ? currentSlideData?.textColor : 'transparent',
+                  borderColor: currentSlideData?.textColor
+                }}
+                onClick={() => setCurrentSlide(index)}
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.9 }}
+              />
+            ))}
+          </div>
+
+          {/* Контроль автовоспроизведения */}
+          <motion.button
+            className="absolute top-8 right-8 p-3 rounded-full border-2"
+            style={{
+              borderColor: currentSlideData?.textColor,
+              color: currentSlideData?.textColor
+            }}
+            onClick={() => setIsAutoPlay(!isAutoPlay)}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            {isAutoPlay ? <FaPause /> : <FaPlay />}
+          </motion.button>
+        </motion.section>
+      </AnimatePresence>
+
+      {/* Секция статистики с более тёмным фоном */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-5xl font-black text-black mb-6 tracking-wider">
+              НАШИ ДОСТИЖЕНИЯ
+            </h2>
+            <div className="w-32 h-1 bg-black mx-auto"></div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {stats.map((stat, index) => {
+              const IconComponent = stat.icon;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.2 }}
+                  viewport={{ once: true }}
+                  className="group text-center p-8 bg-black text-white hover:bg-white hover:text-black transition-all duration-500 border-2 border-black"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <IconComponent className="text-5xl mx-auto mb-4 group-hover:scale-110 transition-transform" />
+                  <motion.div
+                    className="text-4xl font-black mb-2"
+                    initial={{ scale: 0 }}
+                    whileInView={{ scale: 1 }}
+                    transition={{ duration: 0.5, delay: index * 0.2 + 0.3 }}
+                    viewport={{ once: true }}
+                  >
+                    {stat.number}
+                  </motion.div>
+                  <div className="text-lg font-medium tracking-wide">
+                    {stat.label}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
-    </>
+
+      {/* Секция услуг с более тёмным фоном */}
+      <section className="py-20 bg-black text-white">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-5xl font-black mb-6 tracking-wider">
+              НАШИ УСЛУГИ
+            </h2>
+            <div className="w-32 h-1 bg-white mx-auto"></div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {services.map((service, index) => {
+              const IconComponent = service.icon;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.2 }}
+                  viewport={{ once: true }}
+                  className="group p-8 border-2 border-white hover:bg-white hover:text-black transition-all duration-500"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <IconComponent className="text-6xl mb-6 group-hover:scale-110 transition-transform" />
+                  <h3 className="text-2xl font-bold mb-4 tracking-wide">
+                    {service.title}
+                  </h3>
+                  <p className="text-lg opacity-80 group-hover:opacity-100">
+                    {service.description}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Финальный призыв к действию */}
+      <section className="py-20 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100">
+        <div className="container mx-auto px-4 text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1 }}
+            viewport={{ once: true }}
+            className="max-w-4xl mx-auto"
+          >
+            <h2 className="text-6xl font-black text-black mb-8 tracking-wider">
+              ГОТОВЫ НАЧАТЬ?
+            </h2>
+            <p className="text-2xl text-gray-800 mb-12 font-light">
+              Присоединяйтесь к тысячам довольных клиентов уже сегодня
+            </p>
+            <Link href="/register">
+              <motion.button
+                className="group relative px-16 py-6 text-xl font-bold tracking-wider bg-black text-white overflow-hidden"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span className="relative z-10 flex items-center gap-4">
+                  ЗАРЕГИСТРИРОВАТЬСЯ
+                  <FaArrowRight className="group-hover:translate-x-3 transition-transform" />
+                </span>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-gray-800 to-black"
+                  initial={{ x: '-100%' }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+              </motion.button>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Курсор-следящий элемент */}
+      <motion.div
+        className="fixed w-6 h-6 bg-black rounded-full pointer-events-none z-50 mix-blend-difference"
+        animate={{
+          x: mousePosition.x - 12,
+          y: mousePosition.y - 12
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 500,
+          damping: 28
+        }}
+      />
+    </div>
   );
 }

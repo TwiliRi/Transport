@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { api } from "~/trpc/react";
 import { FaTrash, FaBox, FaTruck, FaComments, FaUsers, FaChartBar, FaEdit, FaSave, FaTimes, FaUserShield, FaUserTimes } from "react-icons/fa";
+import TransportDataGenerator from "../_components/TransportDataGenerator";
+import CargoDataGenerator from "../_components/CargoDataGenerator";
 
 type TabType = 'stats' | 'orders' | 'transports' | 'messages' | 'users';
 
@@ -367,6 +369,8 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
+             <TransportDataGenerator />
+            <CargoDataGenerator/>
           </div>
         )}
 

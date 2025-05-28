@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    
     "build": "next build",
     "check": "next lint && tsc --noEmit",
     "db:generate": "prisma migrate dev",
@@ -30,6 +29,7 @@
     "@trpc/react-query": "^11.0.0",
     "@trpc/server": "^11.0.0",
     "@types/jsonwebtoken": "^9.0.9",
+    "animejs": "^4.0.2",
     "bcrypt": "^6.0.0",
     "framer-motion": "^12.11.3",
     "jsonwebtoken": "^9.0.2",

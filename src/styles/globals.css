@@ -9,3 +9,135 @@
   --color-special-gray: #585858;
 }
 
+/* Добавить в конец файла globals.css */
+
+/* Gradient animations */
+/* ... existing code ... */
+
+/* Новые стили для главной страницы */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.6); }
+}
+
+@keyframes text-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes geometric-rotate {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes slide-in-left {
+  0% { transform: translateX(-100%) opacity(0); }
+  100% { transform: translateX(0) opacity(1); }
+}
+
+@keyframes slide-in-right {
+  0% { transform: translateX(100%) opacity(0); }
+  100% { transform: translateX(0) opacity(1); }
+}
+
+/* Утилитарные классы */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-text-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: text-shimmer 2s infinite;
+}
+
+.animate-geometric-rotate {
+  animation: geometric-rotate 20s linear infinite;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 1s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 1s ease-out;
+}
+
+/* Эффекты для текста */
+.text-shadow-glow {
+  text-shadow: 0 0 20px currentColor;
+}
+
+.text-outline {
+  -webkit-text-stroke: 2px currentColor;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Градиентные фоны */
+.bg-monochrome-gradient {
+  background: linear-gradient(135deg, #000000 0%, #ffffff 50%, #000000 100%);
+}
+
+.bg-inverse-gradient {
+  background: linear-gradient(135deg, #ffffff 0%, #000000 50%, #ffffff 100%);
+}
+
+/* Эффекты наведения */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Кастомный скроллбар */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #000;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #333;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .text-8xl { font-size: 4rem; }
+  .text-9xl { font-size: 5rem; }
+  .text-6xl { font-size: 3rem; }
+  .text-7xl { font-size: 3.5rem; }
+}
+
+/* Производительность */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
