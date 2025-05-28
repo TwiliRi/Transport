@@ -18,6 +18,20 @@ export default function SearchFormSimple({ filters, setFilters }: SearchFormProp
   // Состояния для автозаполнения
   const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+
+  // Обработчик изменения типа транспорта
+  const handleVehicleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newVehicleType = e.target.value;
+    setVehicleType(newVehicleType);
+    setFilters({ ...filters, vehicleType: newVehicleType });
+  };
+
+  // Обработчик изменения даты
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value;
+    setDate(newDate);
+    setFilters({ ...filters, date: newDate });
+  };
   
   // Загружаем список городов при монтировании компонента
   useEffect(() => {
@@ -52,11 +66,13 @@ export default function SearchFormSimple({ filters, setFilters }: SearchFormProp
   const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setCity(value);
+    // Сразу обновляем filters
+    setFilters({ ...filters, city: value });
     
     if (value.length > 0) {
       const filteredCities = russianCities.filter(city =>
         city.toLowerCase().includes(value.toLowerCase())
-      ).slice(0, 10); // Ограничиваем количество подсказок для производительности
+      ).slice(0, 10);
       setCitySuggestions(filteredCities);
       setShowCitySuggestions(true);
     } else {
@@ -68,12 +84,13 @@ export default function SearchFormSimple({ filters, setFilters }: SearchFormProp
   // Обработчик выбора города из списка
   const handleSelectCity = (selectedCity: string) => {
     setCity(selectedCity);
+    setFilters({ ...filters, city: selectedCity });
     setShowCitySuggestions(false);
   };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setFilters({ vehicleType, city, date });
+    // Форма уже обновляет filters при каждом изменении
   };
 
   return (
@@ -114,13 +131,22 @@ export default function SearchFormSimple({ filters, setFilters }: SearchFormProp
           <select 
             className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
             value={vehicleType}
-            onChange={(e) => setVehicleType(e.target.value)}
+            onChange={handleVehicleTypeChange}
           >
             <option value="all">Все виды</option>
             <option value="truck">Грузовик</option>
             <option value="truck_with_trailer">Фура</option>
             <option value="car">Легковой автомобиль</option>
+            <option value="van">Микроавтобус</option>
+            <option value="refrigerator">Рефрижератор</option>
+            <option value="tanker">Автоцистерна</option>
+            <option value="container">Контейнеровоз</option>
+            <option value="tow_truck">Эвакуатор</option>
+            <option value="dump_truck">Самосвал</option>
+            <option value="flatbed">Платформа</option>
+            <option value="crane">Кран</option>
           </select>
+          
         </div>
 
         <div>
@@ -128,7 +154,7 @@ export default function SearchFormSimple({ filters, setFilters }: SearchFormProp
           <input 
             type="date" 
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={handleDateChange}
             className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
           />
         </div>
@@ -144,17 +170,14 @@ export default function SearchFormSimple({ filters, setFilters }: SearchFormProp
             setDate("");
             setCitySuggestions([]);
             setShowCitySuggestions(false);
+            // Сразу сбрасываем filters
+            setFilters({ vehicleType: "all", city: "", date: "" });
           }}
         >
           Сбросить
-        </button>
-        <button
-          type="submit"
-          className="w-full sm:w-auto px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors text-center"
-        >
-          Найти
         </button>
       </div>
     </form>
   );
 }
+

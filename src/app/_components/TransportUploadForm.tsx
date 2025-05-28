@@ -6,7 +6,11 @@ import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { FaCamera } from "react-icons/fa";
 
-export default function TransportUploadForm() {
+interface TransportUploadFormProps {
+  onSuccessCallback?: () => void;
+}
+
+export default function TransportUploadForm({ onSuccessCallback }: TransportUploadFormProps) {
   const router = useRouter();
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,10 +88,27 @@ export default function TransportUploadForm() {
   const createTransport = api.transport.create.useMutation({
     onSuccess: () => {
       setIsSubmitting(false);
+      // Сброс формы к начальным значениям
+      setFormData({
+        title: "",
+        driverName: "",
+        phoneNumber: "",
+        vehicleType: "",
+        carryingCapacity: 0,
+        platformLength: 0,
+        platformWidth: 0,
+        description: "",
+        workPeriodStart: new Date().toISOString().split("T")[0],
+        workPeriodEnd: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+        city: "",
+        minOrderTime: 1,
+        price: "договорная"
+      });
+      setPreviewImage(null); // Сброс предпросмотра изображения
+      // Вызываем callback для обновления данных
+      onSuccessCallback?.();
       // Перенаправляем на страницу поиска после успешной отправки
       router.push("/search?success=true");
-      // Или можно просто показать сообщение об успехе и очистить форму
-      // setFormData({ ... }); // Сброс формы
     },
     onError: (error) => {
       setIsSubmitting(false);
@@ -295,7 +316,6 @@ export default function TransportUploadForm() {
                 }}
                 min="0"
                 max="100000" // Максимальное значение в кг
-                step="100" // Шаг в кг
                 placeholder="1500" // Пример в кг
                 className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
                 required

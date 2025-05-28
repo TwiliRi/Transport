@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Car from "~/public/car.png";
 import { FaTruck, FaUser, FaMapMarkerAlt, FaCalendar, FaRuler, FaWeight, FaClock, FaCamera } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion"; // Добавляем импорт framer-motion
+import { motion, AnimatePresence } from "framer-motion";
 import TruckCard from "../_components/TruckCard";
-import { api } from "~/trpc/react"; // Добавляем импорт API клиента
-import { useRouter } from "next/navigation"; // Для перенаправления после отправки
-import SearchForm from "../_components/SearchFormSimple";
+import { api } from "~/trpc/react";
+import { useRouter } from "next/navigation";
 import TransportUploadForm from "../_components/TransportUploadForm";
 import { OrderCardSkeleton } from "../_components/OrderCard";
+import SearchFormCar from "../_components/SearchFormCar";
 
 export default function Search() {
   const [currentPage, setCurrentPage] = useState("search");
@@ -20,11 +20,86 @@ export default function Search() {
     date: ""
   });
 
-  // Получаем данные о транспорте из API
-  const { data: transports, isLoading } = api.transport.getAll.useQuery({
+  // Получаем ВСЕ данные о транспорте из API без фильтрации по городу
+  const { data: allTransports, isLoading, refetch } = api.transport.getAll.useQuery({
     vehicleType: filters.vehicleType !== "all" ? filters.vehicleType : undefined,
-    city: filters.city || undefined,
+    // Убираем фильтрацию по городу из API запроса
   });
+
+  // Функция для парсинга периода работы
+  const parseWorkPeriod = (workPeriod: string) => {
+    try {
+      // Ожидаем формат "дата1 - дата2" или "дата1-дата2" или просто "дата1"
+      const cleanPeriod = workPeriod.trim();
+      
+      // Проверяем различные форматы разделителей
+      let dates: string[];
+      if (cleanPeriod.includes(' - ')) {
+        dates = cleanPeriod.split(' - ');
+      } else if (cleanPeriod.includes('-')) {
+        dates = cleanPeriod.split('-');
+      } else if (cleanPeriod.includes(' по ')) {
+        dates = cleanPeriod.split(' по ');
+      } else {
+        // Если только одна дата
+        dates = [cleanPeriod];
+      }
+      
+      const startDate = new Date(dates[0]?.trim() || '');
+      const endDate = dates[1] ? new Date(dates[1].trim()) : startDate;
+      
+      // Проверяем валидность дат
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return null;
+      }
+      
+      return { startDate, endDate };
+    } catch (error) {
+      console.error('Ошибка парсинга периода работы:', error);
+      return null;
+    }
+  };
+
+  // Применяем фильтрацию и сортировку на фронтенде
+  const filteredAndSortedTransports = useMemo(() => {
+    if (!allTransports) return [];
+    
+    // Сначала фильтруем
+    let filtered = allTransports.filter(transport => {
+      // Фильтрация по городу
+      if (filters.city && filters.city.trim() !== "") {
+        const cityMatch = transport.city.toLowerCase().includes(filters.city.toLowerCase());
+        if (!cityMatch) return false;
+      }
+      
+      // Фильтрация по дате - проверяем, входит ли выбранная дата в период работы
+      if (filters.date && filters.date.trim() !== "") {
+        const selectedDate = new Date(filters.date);
+        const workPeriodDates = parseWorkPeriod(transport.workPeriod);
+        
+        if (!workPeriodDates) {
+          // Если не удалось распарсить период работы, исключаем из результатов
+          return false;
+        }
+        
+        const { startDate, endDate } = workPeriodDates;
+        
+        // Проверяем, входит ли выбранная дата в период работы (включительно)
+        if (selectedDate < startDate || selectedDate > endDate) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+
+    // Сортируем по дате создания (новые сначала)
+    const sorted = [...filtered].sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    return sorted;
+  }, [allTransports, filters]);
 
   return (
     <div className="w-full max-w-[1366px] mx-auto px-4 sm:px-6 lg:px-8 py-8 ">
@@ -60,7 +135,7 @@ export default function Search() {
               exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <SearchForm filters={filters} setFilters={setFilters} />
+              <SearchFormCar filters={filters} setFilters={setFilters} />
             </motion.div>
           ) : (
             <motion.div
@@ -70,18 +145,31 @@ export default function Search() {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <TransportUploadForm />
+              <TransportUploadForm onSuccessCallback={refetch} />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
       <div className="mt-8 space-y-6">
+        {/* Показываем количество найденных результатов */}
+        {!isLoading && filteredAndSortedTransports && (
+          <div className="text-center text-gray-600 mb-4">
+            Найдено: {filteredAndSortedTransports.length} {filteredAndSortedTransports.length === 1 ? 'транспорт' : 
+              filteredAndSortedTransports.length < 5 ? 'транспорта' : 'транспортов'}
+            {filters.city && ` в городе "${filters.city}"`}
+            {filters.date && ` доступных на дату ${new Date(filters.date).toLocaleDateString('ru-RU')}`}
+            <span className="ml-2 text-sm text-blue-600">
+              (сортировка: по дате создания, новые сначала)
+            </span>
+          </div>
+        )}
+        
         {isLoading ? (
           <OrderCardSkeleton/>
-        ) : transports && transports.length > 0 ? (
+        ) : filteredAndSortedTransports && filteredAndSortedTransports.length > 0 ? (
           <AnimatePresence>
-            {transports.map((transport) => (
+            {filteredAndSortedTransports.map((transport) => (
               <motion.div
                 key={transport.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -94,7 +182,12 @@ export default function Search() {
           </AnimatePresence>
         ) : (
           <div className="text-center py-8">
-            <p className="text-gray-600">Транспорт не найден. Попробуйте изменить параметры поиска.</p>
+            <p className="text-gray-600">
+              {filters.city || filters.date ? 
+                `Транспорт с указанными параметрами не найден. Попробуйте изменить параметры поиска.` :
+                "Транспорт не найден. Попробуйте изменить параметры поиска."
+              }
+            </p>
           </div>
         )}
       </div>

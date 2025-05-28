@@ -314,6 +314,7 @@ export default function  SearchForm({
           >
             <option value="">Все статусы</option>
             <option value="active">Активные</option>
+            <option value="processing">В процессе</option>
             <option value="completed">Завершенные</option>
             <option value="cancelled">Отмененные</option>
           </select>
@@ -357,13 +358,7 @@ export default function  SearchForm({
         >
           Сбросить
         </button>
-        <button
-          type="submit"
-          className="px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors"
-        >
-          <FaSearch className="inline mr-2" />
-          Найти
-        </button>
+        
       </div>
     </form>
   );

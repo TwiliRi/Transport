@@ -73,20 +73,27 @@ export default function CreateForm() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
     const router = useRouter();
+    // Добавляем utils для работы с кешем tRPC
+    const utils = api.useUtils();
+    
     // Используем tRPC мутацию для создания заказа
     const createOrderMutation = api.order.create.useMutation({
-      onSuccess: () => {
-        console.log("Order created successfully");
+      onSuccess: async () => {
+        
+        // Инвалидируем кеш заказов для обновления данных
+        await utils.order.getAll.invalidate();
         
         setSuccess(true);
         // Сбрасываем форму
         setFromCity("");
         setToCity("");
-        setDepartureDate("");
+        setDepartureDate(new Date(Date.now()).toISOString().split('T')[0]); // Сброс даты на текущую
         setCargoWeight("");
         setPrice("");
-        setTransportType("");
+        setTransportType("all"); // Сброс transportType на значение по умолчанию
         setDescription("");
+        setImageUrl(null); // Сброс URL изображения
+        setImagePreview(null); // Сброс предпросмотра изображения
         // Скрываем сообщение об успехе через 3 секунды
         setTimeout(() => {
           setSuccess(false);

@@ -60,6 +60,7 @@ model User {
   password      String?
   phone         String?   // Добавляем поле телефона
   userType      String?   // Тип пользователя: "carrier" (перевозчик) или "customer" (заказчик)
+  isAdmin       Boolean   @default(false) // Добавляем поле для админских прав
   accounts      Account[]
   sessions      Session[]
   posts         Post[]
@@ -69,6 +70,8 @@ model User {
   // Связи для чата
   responses     Response[] @relation("CarrierResponses")
   messages      Message[]
+  ownedChats  PrivateChat[] @relation("OwnerChats")
+  clientChats PrivateChat[] @relation("ClientChats")
 }
 
 model VerificationToken {
@@ -129,13 +132,20 @@ model Message {
   content   String
   createdAt DateTime @default(now())
   
-  // Связь с откликом
-  responseId String
-  response   Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  // Связь с откликом (теперь необязательная)
+  responseId String?
+  response   Response? @relation(fields: [responseId], references: [id], onDelete: Cascade)
   
   // Связь с отправителем
   senderId  String
   sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  
+  // Добавляем поле для идентификации типа чата
+  chatType  String?  // "order" для чатов заказов, "transport" для чатов транспорта
+  chatId    String?  // ID заказа или транспорта
+
+  privateChatId String?
+  privateChat   PrivateChat? @relation("PrivateChatMessages", fields: [privateChatId], references: [id], onDelete: Cascade)
 }
 
 
@@ -158,10 +168,29 @@ model Transport {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
+  privateChats PrivateChat[]
   // Связь с пользователем
   userId          String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 
+
+model PrivateChat {
+  id          String   @id @default(cuid())
+  transportId String   // ID транспорта
+  ownerId     String   // ID владельца транспорта
+  clientId    String   // ID клиента
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Связи
+  transport   Transport @relation(fields: [transportId], references: [id], onDelete: Cascade)
+  owner       User      @relation("OwnerChats", fields: [ownerId], references: [id], onDelete: Cascade)
+  client      User      @relation("ClientChats", fields: [clientId], references: [id], onDelete: Cascade)
+  messages    Message[] @relation("PrivateChatMessages")
+  
+  // Уникальность: один чат между двумя пользователями по одному транспорту
+  @@unique([transportId, ownerId, clientId])
+}
 

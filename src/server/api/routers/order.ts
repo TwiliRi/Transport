@@ -104,7 +104,7 @@ export const orderRouter = createTRPCRouter({
       date: z.string().min(1, "Дата обязательна"),
       description: z.string().optional(),
       imageUrl: z.string().optional(),
-      status: z.enum(['active', 'completed', 'cancelled','processing']),
+      status: z.enum(['active', 'processing', 'completed', 'cancelled']),
     }))
     .mutation(async ({ ctx, input }) => {
       // Проверяем, что пользователь авторизован
@@ -176,41 +176,5 @@ export const orderRouter = createTRPCRouter({
       });
       
       return deletedOrder;
-    }),
-  // Добавляем новый метод для обновления только статуса заказа
-  updateStatus: protectedProcedure
-    .input(z.object({
-      id: z.string(),
-      status: z.enum(['active', 'processing', 'completed', 'cancelled']),
-    }))
-    .mutation(async ({ ctx, input }) => {
-      // Проверяем, что пользователь авторизован
-      if (!ctx.session || !ctx.session.user) {
-        throw new Error("Необходимо авторизоваться");
-      }
-      
-      // Находим заказ по ID
-      const order = await ctx.db.order.findUnique({
-        where: { id: input.id },
-      });
-      
-      // Проверяем, что заказ существует и принадлежит текущему пользователю
-      if (!order) {
-        throw new Error("Заказ не найден");
-      }
-      
-      if (order.userId !== ctx.session.user.id) {
-        throw new Error("У вас нет прав на изменение статуса этого заказа");
-      }
-      
-      // Обновляем только статус заказа
-      const updatedOrder = await ctx.db.order.update({
-        where: { id: input.id },
-        data: {
-          status: input.status,
-        },
-      });
-      
-      return updatedOrder;
     }),
 });

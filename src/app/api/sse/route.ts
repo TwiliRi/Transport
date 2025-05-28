@@ -51,25 +51,77 @@ export async function GET(request: NextRequest) {
           }
           
           // Получаем только новые сообщения с момента последней проверки
-          const messages = await db.message.findMany({
-            where: {
-              responseId: responseId,
-              createdAt: {
-                gt: lastTimestamp
-              }
-            },
-            orderBy: {
-              createdAt: "asc",
-            },
-            include: {
-              sender: {
-                select: {
-                  id: true,
-                  name: true,
+          let messages;
+          
+          // Проверяем тип чата по responseId
+          if (responseId.startsWith('private-chat-')) {
+            const chatId = responseId.replace('private-chat-', '');
+            
+            messages = await db.message.findMany({
+              where: {
+                privateChatId: chatId,
+                createdAt: {
+                  gt: lastTimestamp
+                }
+              },
+              orderBy: {
+                createdAt: "asc",
+              },
+              include: {
+                sender: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
                 },
               },
-            },
-          });
+            });
+          } else if (responseId.startsWith('transport-')) {
+            // Существующая логика для транспортных чатов
+            const transportId = responseId.replace('transport-', '');
+            
+            messages = await db.message.findMany({
+              where: {
+                chatType: "transport",
+                chatId: transportId,
+                createdAt: {
+                  gt: lastTimestamp
+                }
+              },
+              orderBy: {
+                createdAt: "asc",
+              },
+              include: {
+                sender: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            });
+          } else {
+            // Существующая логика для чатов заказов
+            messages = await db.message.findMany({
+              where: {
+                responseId: responseId,
+                createdAt: {
+                  gt: lastTimestamp
+                }
+              },
+              orderBy: {
+                createdAt: "asc",
+              },
+              include: {
+                sender: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            });
+          }
 
           if (messages.length > 0) {
             // Обновляем timestamp последнего сообщения

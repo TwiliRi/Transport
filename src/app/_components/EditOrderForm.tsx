@@ -9,7 +9,7 @@ import { useSession } from "next-auth/react";
 interface Order {
   id: string;
   number: string;
-  status: 'active' | 'completed' | 'cancelled' | "processing" ;
+  status: 'active' | 'completed' | 'cancelled' | 'processing' ;
   date: string;
   route: {
     from: string;
@@ -124,7 +124,7 @@ export default function EditOrderForm({ order, onClose }: EditOrderFormProps) {
       date: formattedDate,
       description,
       imageUrl,
-      status,
+      status: status as 'active' | 'completed' | 'cancelled' | "processing",
     });
   };
   

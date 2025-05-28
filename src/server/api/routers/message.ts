@@ -180,4 +180,274 @@ export const messageRouter = createTRPCRouter({
 
       return message;
     }),
+
+    getTransportMessages: protectedProcedure
+  .input(z.object({ transportId: z.string() }))
+  .query(async ({ ctx, input }) => {
+    // Проверяем существование транспорта
+    const transport = await ctx.db.transport.findUnique({
+      where: { id: input.transportId },
+    });
+
+    if (!transport) {
+      throw new Error("Транспорт не найден");
+    }
+
+    // Получаем сообщения для транспортного чата
+    const messages = await ctx.db.message.findMany({
+      where: {
+        chatType: "transport",
+        chatId: input.transportId,
+      },
+      include: {
+        sender: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+
+    return messages.map((message) => ({
+      id: message.id,
+      content: message.content,
+      createdAt: message.createdAt,
+      senderId: message.senderId,
+      senderName: message.sender.name,
+    }));
+  }),
+
+// Создание сообщения для транспортного чата
+createTransportMessage: protectedProcedure
+  .input(
+    z.object({
+      content: z.string().min(1),
+      transportId: z.string(),
+    })
+  )
+  .mutation(async ({ ctx, input }) => {
+    // Проверяем существование транспорта в таблице transport
+    const transport = await ctx.db.transport.findUnique({
+      where: { id: input.transportId },
+      select: { 
+        userId: true,
+        id: true 
+      }
+    });
+
+    // Проверяем, что транспорт существует
+    if (!transport) {
+      throw new Error("Транспорт не найден");
+    }
+
+    // Проверяем, что пользователь имеет доступ к этому чату
+    // (владелец транспорта или любой авторизованный пользователь может писать)
+    // Здесь можно добавить дополнительную логику проверки доступа при необходимости
+
+    // Создаем сообщение
+    const message = await ctx.db.message.create({
+      data: {
+        content: input.content,
+        senderId: ctx.session.user.id,
+        chatType: "transport",
+        chatId: input.transportId,
+      },
+      include: {
+        sender: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    return {
+      id: message.id,
+      content: message.content,
+      createdAt: message.createdAt,
+      senderId: message.senderId,
+      senderName: message.sender.name,
+    };
+  }),
+
+  getOrCreatePrivateChat: protectedProcedure
+  .input(z.object({ 
+    transportId: z.string(),
+    ownerId: z.string()
+  }))
+  .mutation(async ({ ctx, input }) => {
+    const clientId = ctx.session.user.id;
+    
+    // Проверяем, что клиент не является владельцем транспорта
+    if (clientId === input.ownerId) {
+      throw new Error("Нельзя создать чат с самим собой");
+    }
+    
+    // Ищем существующий чат
+    let chat = await ctx.db.privateChat.findUnique({
+      where: {
+        transportId_ownerId_clientId: {
+          transportId: input.transportId,
+          ownerId: input.ownerId,
+          clientId: clientId
+        }
+      }
+    });
+    
+    // Если чата нет, создаем новый
+    if (!chat) {
+      chat = await ctx.db.privateChat.create({
+        data: {
+          transportId: input.transportId,
+          ownerId: input.ownerId,
+          clientId: clientId
+        }
+      });
+    }
+    
+    return chat;
+  }),
+
+// Получение сообщений приватного чата
+getPrivateChatMessages: protectedProcedure
+  .input(z.object({ chatId: z.string() }))
+  .query(async ({ ctx, input }) => {
+    // Проверяем доступ к чату
+    const chat = await ctx.db.privateChat.findUnique({
+      where: { id: input.chatId }
+    });
+    
+    if (!chat) {
+      throw new Error("Чат не найден");
+    }
+    
+    // Проверяем, что пользователь участник чата
+    if (chat.ownerId !== ctx.session.user.id && chat.clientId !== ctx.session.user.id) {
+      throw new Error("Нет доступа к этому чату");
+    }
+    
+    const messages = await ctx.db.message.findMany({
+      where: {
+        privateChatId: input.chatId
+      },
+      include: {
+        sender: {
+          select: {
+            name: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: "asc"
+      }
+    });
+    
+    return messages.map((message) => ({
+      id: message.id,
+      content: message.content,
+      createdAt: message.createdAt,
+      senderId: message.senderId,
+      senderName: message.sender.name
+    }));
+  }),
+
+// Создание сообщения в приватном чате
+createPrivateChatMessage: protectedProcedure
+  .input(z.object({
+    chatId: z.string(),
+    content: z.string().min(1)
+  }))
+  .mutation(async ({ ctx, input }) => {
+    // Проверяем доступ к чату
+    const chat = await ctx.db.privateChat.findUnique({
+      where: { id: input.chatId }
+    });
+    
+    if (!chat) {
+      throw new Error("Чат не найден");
+    }
+    
+    // Проверяем, что пользователь участник чата
+    if (chat.ownerId !== ctx.session.user.id && chat.clientId !== ctx.session.user.id) {
+      throw new Error("Нет доступа к этому чату");
+    }
+    
+    const message = await ctx.db.message.create({
+      data: {
+        content: input.content,
+        senderId: ctx.session.user.id,
+        privateChatId: input.chatId
+      },
+      include: {
+        sender: {
+          select: {
+            name: true
+          }
+        }
+      }
+    });
+    
+    return {
+      id: message.id,
+      content: message.content,
+      createdAt: message.createdAt,
+      senderId: message.senderId,
+      senderName: message.sender.name
+    };
+  }),
+
+// Получение списка приватных чатов пользователя
+getUserPrivateChats: protectedProcedure
+  .query(async ({ ctx }) => {
+    const chats = await ctx.db.privateChat.findMany({
+      where: {
+        OR: [
+          { ownerId: ctx.session.user.id },
+          { clientId: ctx.session.user.id }
+        ]
+      },
+      include: {
+        transport: {
+          select: {
+            title: true,
+            vehicleType: true
+          }
+        },
+        owner: {
+          select: {
+            name: true
+          }
+        },
+        client: {
+          select: {
+            name: true
+          }
+        },
+        messages: {
+          orderBy: {
+            createdAt: "desc"
+          },
+          take: 1
+        }
+      },
+      orderBy: {
+        updatedAt: "desc"
+      }
+    });
+    
+    return chats.map(chat => ({
+      id: chat.id,
+      transportId: chat.transportId,
+      transportTitle: chat.transport.title,
+      transportType: chat.transport.vehicleType,
+      otherUserName: chat.ownerId === ctx.session.user.id ? chat.client.name : chat.owner.name,
+      lastMessage: chat.messages[0] || null,
+      updatedAt: chat.updatedAt
+    }));
+  }),
+
+    
 });
