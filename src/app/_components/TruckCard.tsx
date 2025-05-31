@@ -355,7 +355,7 @@ export default function TruckCard({ transport }: TruckCardProps) {
               <h4 className="mb-4 text-xl font-semibold">
                 Чат с {transport.driverName}
               </h4>
-              // В модальном окне чата заменяем компонент Chat на TransportChat
+             
               <div className="h-96">
                 <PrivateTransportChat
                   transportId={transport.id}

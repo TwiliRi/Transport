@@ -249,7 +249,7 @@ export default function ShipmentsPage() {
         ) : (
           <div className="text-center py-8">
             <p className="text-gray-500">У вас пока нет размещенных машин</p>
-            <p className="text-sm text-gray-400 mt-2">Перейдите в раздел "Разместить транспорт" чтобы добавить свою машину</p>
+            <p className="text-sm text-gray-400 mt-2">Перейдите в раздел &ldquo;Разместить транспорт&ldquo; чтобы добавить свою машину</p>
           </div>
         )}
       </div>

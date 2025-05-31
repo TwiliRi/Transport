@@ -84,7 +84,7 @@ export default function Search() {
     // Принудительно обновляем данные
     setForceUpdate(prev => prev + 1);
     refetch();
-  }, []);
+  }, [refetch]);
 
   // Функция для автоматической загрузки
   const handleAutoLoadMore = useCallback(() => {

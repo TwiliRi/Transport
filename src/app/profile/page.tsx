@@ -110,7 +110,7 @@ export default async function Profile() {
                 <div>
                   <p className="text-gray-500 text-sm mb-1">Дата регистрации</p>
                   <p className="font-medium">
-                     "Не указано"
+                  &ldquo;Не указано&ldquo;
                   </p>
                 </div>
               </div>
