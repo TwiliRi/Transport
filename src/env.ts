@@ -39,7 +39,7 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
-    NODE_ENV: process.env.NODE_ENV,
+    NODE_ENV: process.env.NODE_ENV
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
