@@ -9,7 +9,7 @@
     "moduleDetection": "force",
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
-
+    "typeRoots": ["./src/types", "./node_modules/@types"],
     /* Strictness */
     "strict": true,
     "noUncheckedIndexedAccess": true,
