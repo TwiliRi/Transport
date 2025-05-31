@@ -74,29 +74,47 @@ export default function EditOrderForm({ order, onClose }: EditOrderFormProps) {
   
   // Мутация для обновления заказа
   const updateOrderMutation = api.order.update.useMutation({
-    onSuccess: async () => {
-      // Инвалидируем кеш только для конкретного заказа
-      await utils.order.getAll.invalidate();
-      // Обновляем только те данные, которые относятся к текущему заказу
-      utils.order.getAll.setData(undefined, (oldData) => {
-        if (!oldData) return oldData;
-        return oldData.map(item => 
-          item.id === order.id ? { ...item, ...order } : item
-        );
-      });
-      
-      setSuccess(true);
-      setIsLoading(false);
-      setTimeout(() => {
-        router.refresh();
-        onClose();
-      }, 2000);
-    },
-    onError: (error) => {
-      setError(error.message);
-      setIsLoading(false);
-    }
-  });
+  onSuccess: async () => {
+    // Инвалидируем кеш только для конкретного заказа
+    await utils.order.getAll.invalidate();
+    // Обновляем только те данные, которые относятся к текущему заказу
+    utils.order.getAll.setData(undefined, (oldData) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        orders: oldData.orders.map((item) => {
+          if (item.id === order.id) {
+            // Сохраняем структуру серверного объекта, обновляя только нужные поля
+            return {
+              ...item,
+              routeFrom: order.route?.from || item.routeFrom,
+              routeTo: order.route?.to || item.routeTo,
+              cargoType: order.cargo?.type || item.cargoType,
+              cargoWeight: order.cargo?.weight || item.cargoWeight,
+              price: order.price || item.price,
+              date: order.date || item.date,
+              description: order.description || item.description,
+              imageUrl: order.imageUrl || item.imageUrl,
+              status: order.status || item.status,
+            };
+          }
+          return item;
+        })
+      };
+    });
+    
+    setSuccess(true);
+    setIsLoading(false);
+    setTimeout(() => {
+      router.refresh();
+      onClose();
+    }, 2000);
+  },
+  onError: (error) => {
+    setError(error.message);
+    setIsLoading(false);
+  }
+});
   
   // Обработчик отправки формы
   const handleSubmit = (e: React.FormEvent) => {
