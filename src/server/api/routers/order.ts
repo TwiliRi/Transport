@@ -199,73 +199,7 @@ export const orderRouter = createTRPCRouter({
       
       return deletedOrder;
     }),
-    getInfinite: publicProcedure
-    .input(z.object({
-      status: z.string().optional(),
-      routeFrom: z.string().optional(),
-      routeTo: z.string().optional(),
-      date: z.string().optional(),
-      limit: z.number().min(1).max(50).default(10),
-      cursor: z.string().nullish(), // cursor для infinite query
-    }).optional())
-    .query(async ({ ctx, input }) => {
-      const limit = input?.limit ?? 10;
-      
-      // Создаем базовый запрос
-      const whereClause: any = {};
-      
-      // Добавляем фильтры, если они указаны
-      if (input?.status) {
-        whereClause.status = input.status;
-      }
-      
-      if (input?.routeFrom) {
-        whereClause.routeFrom = {
-          contains: input.routeFrom,
-          mode: 'insensitive',
-        };
-      }
-      
-      if (input?.routeTo) {
-        whereClause.routeTo = {
-          contains: input.routeTo,
-          mode: 'insensitive',
-        };
-      }
-      
-      if (input?.date) {
-        whereClause.date = input.date;
-      }
-      
-      // Получаем заказы с cursor-based пагинацией
-      const orders = await ctx.db.order.findMany({
-        where: whereClause,
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-        take: limit + 1, // Берем на 1 больше для определения nextCursor
-        cursor: input?.cursor ? { id: input.cursor } : undefined,
-      });
-      
-      let nextCursor: string | undefined = undefined;
-      if (orders.length > limit) {
-        const nextItem = orders.pop(); // Удаляем последний элемент
-        nextCursor = nextItem!.id;
-      }
-      
-      return {
-        orders,
-        nextCursor,
-      };
-    }),
+    
 });
 
   // Метод для infinite query - добавить перед закрывающей скобкой (строка 202)
