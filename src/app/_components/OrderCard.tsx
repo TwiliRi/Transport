@@ -132,7 +132,7 @@ export default function OrderCard({ order }: { order: Order }) {
           setAcceptedResponse({
             id: accepted.id,
             carrierId: accepted.carrierId,
-            carrierName: accepted.carrier.name || 'Перевозчик',
+            carrierName: (accepted as any).carrier?.name ?? 'Перевозчик',
             status: accepted.status
           });
         }
