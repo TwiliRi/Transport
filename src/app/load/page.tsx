@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { FaTruck, FaBox, FaMapMarkerAlt, FaCalendar, FaMoneyBillWave, FaSearch, FaUser } from "react-icons/fa";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { FaTruck, FaBox, FaMapMarkerAlt, FaCalendar, FaMoneyBillWave, FaSearch, FaUser, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { api } from "~/trpc/react"; // Добавляем импорт API
+import { api } from "~/trpc/react";
 import SearchForm from "../_components/SearchForm";
 import CreateForm from "../_components/CreateForm";
 import OrderCard, { OrderCardSkeleton } from "../_components/OrderCard";
@@ -31,8 +31,8 @@ interface Order {
     value: string;
     label: string;
   };
-  imageUrl?: string; // Добавляем опциональное поле для URL изображения
-  description?: string; // Добавляем опциональное поле для описания груза
+  imageUrl?: string;
+  description?: string;
   user?: {
     id: string;
     name: string;
@@ -40,8 +40,6 @@ interface Order {
 }
 
 export default function Load() {
-
-
   const [currentPage, setCurrentPage] = useState("load");
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
@@ -54,41 +52,117 @@ export default function Load() {
   const [dateFilter, setDateFilter] = useState<string>(''); 
   const [isLoading, setIsLoading] = useState(true);
   const [transportTypeFilter, setTransportTypeFilter] = useState<string>("all");
-
-  // Загружаем пользовательские типы транспорта из localStorage только на стороне клиента
   
+  // Состояния для серверной пагинации
+  const [currentPageNumber, setCurrentPageNumber] = useState(1);
+  const [displayedOrders, setDisplayedOrders] = useState<Order[]>([]);
+  const [showLoadMore, setShowLoadMore] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  
+  // Новые состояния для пагинации отфильтрованных результатов
+  const [filteredCurrentPage, setFilteredCurrentPage] = useState(1);
+  const [paginatedFilteredOrders, setPaginatedFilteredOrders] = useState<Order[]>([]);
+  const [filteredTotalPages, setFilteredTotalPages] = useState(1);
+  
+  // Состояния для автоматической загрузки
+  const [isAutoLoading, setIsAutoLoading] = useState(false);
+  const lastOrderRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  
+  const ORDERS_PER_PAGE = 10;
 
-  // Используем tRPC для получения заказов из базы данных
-  const { data: dbOrders, isLoading: isOrdersLoading } = api.order.getAll.useQuery(
+  // Используем tRPC для получения заказов из базы данных с пагинацией
+  const { data: dbOrdersData, isLoading: isOrdersLoading, refetch } = api.order.getAll.useQuery(
     {
       status: statusFilter || undefined,
       routeFrom: routeFromFilter || undefined,
       routeTo: routeToFilter || undefined,
       date: dateFilter || undefined,
+      page: currentPageNumber,
+      limit: ORDERS_PER_PAGE,
     },
     {
-      // Обновляем данные при изменении фильтров
       enabled: true,
       refetchOnWindowFocus: false,
     }
   );
 
+  // Функция для автоматической загрузки следующей страницы
+  const handleAutoLoadMore = useCallback(() => {
+    if (showLoadMore && !isOrdersLoading && !isAutoLoading) {
+      setIsAutoLoading(true);
+      setCurrentPageNumber(prev => prev + 1);
+    }
+  }, [showLoadMore, isOrdersLoading, isAutoLoading]);
+
+  // Настройка Intersection Observer для автоматической загрузки
+
+
+  // Добавить после объявления всех состояний, примерно после строки 60
+
+// Принудительный сброс состояния при монтировании компонента
+useEffect(() => {
+  // Сброс серверной пагинации
+  setCurrentPageNumber(1);
+  setDisplayedOrders([]);
+  setOrders([]);
+  setTotalPages(1);
+  setTotalCount(0);
+  setShowLoadMore(true);
   
+  // Сброс клиентской пагинации
+  setFilteredCurrentPage(1);
+  setFilteredOrders([]);
+  setPaginatedFilteredOrders([]);
+  setFilteredTotalPages(1);
+  
+  // Сброс состояний загрузки
+  setIsLoading(true);
+  setIsAutoLoading(false);
+  
+  // Принудительный рефетч данных
+  refetch();
+}, []); // Пустой массив зависимостей - выполняется только при монтировании
 
 
 
-
-
-
-
-  // Преобразуем данные из базы в формат для отображения
   useEffect(() => {
-    if (dbOrders) {
-      const formattedOrders: Order[] = dbOrders.map(order => ({
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry?.isIntersecting) {
+          handleAutoLoadMore();
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '100px'
+      }
+    );
+
+    if (lastOrderRef.current && paginatedFilteredOrders.length > 0) {
+      observerRef.current.observe(lastOrderRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [paginatedFilteredOrders.length, handleAutoLoadMore]);
+
+  useEffect(() => {
+    if (dbOrdersData) {
+      const formattedOrders: Order[] = dbOrdersData.orders.map(order => ({
         id: order.id,
         number: order.number,
         status: order.status as 'active' | 'completed' | 'cancelled',
-        date: formatDate(order.date), // Преобразуем дату в нужный формат
+        date: formatDate(order.date),
         route: {
           from: order.routeFrom,
           to: order.routeTo,
@@ -99,19 +173,30 @@ export default function Load() {
           weight: order.cargoWeight,
         },
         description: order.description || undefined,
-        imageUrl: order.imageUrl || undefined, // Добавляем поле imageUrl
+        imageUrl: order.imageUrl || undefined,
         user: order.user ? {
           id: order.user.id,
           name: order.user.name || "Неизвестный пользователь"
         } : undefined
       }));
       
-      setOrders(formattedOrders);
+      if (currentPageNumber === 1) {
+        setDisplayedOrders(formattedOrders);
+        setOrders(formattedOrders);
+      } else {
+        setDisplayedOrders(prev => [...prev, ...formattedOrders]);
+        setOrders(prev => [...prev, ...formattedOrders]);
+      }
+      
+      setTotalPages(dbOrdersData.totalPages);
+      setTotalCount(dbOrdersData.totalCount);
+      setShowLoadMore(dbOrdersData.hasNextPage);
       setIsLoading(false);
+      setIsAutoLoading(false);
     }
-  }, [dbOrders]);
+  }, [dbOrdersData, currentPageNumber]);
 
-  // Функция для форматирования даты из ISO в формат DD.MM.YYYY
+  // Функция для форматирования даты
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const day = date.getDate().toString().padStart(2, '0');
@@ -120,57 +205,23 @@ export default function Load() {
     return `${day}.${month}.${year}`;
   };
 
-  // Применение фильтров и сортировки при их изменении
+  // Применение фильтров и пагинации для отфильтрованных результатов
   useEffect(() => {
-    let result = [...orders];
+    let result = [...displayedOrders];
 
-    // Применяем фильтр по дате
-    if (dateFilter) {
-      result = result.filter(order => {
-        // Преобразуем дату заказа в формат YYYY-MM-DD для сравнения
-        const orderDateParts = order.date.split('.');
-        const formattedOrderDate = `${orderDateParts[2]}-${orderDateParts[1]}-${orderDateParts[0]}`;
-        return formattedOrderDate === dateFilter;
-      });
-    }
-    
-    // Применяем фильтр по статусу
-    if (statusFilter) {
-      result = result.filter(order => order.status === statusFilter);
-    }
-    
-    // Применяем фильтр по маршруту (откуда)
-    if (routeFromFilter) {
-      result = result.filter(order => 
-        order.route.from.toLowerCase().includes(routeFromFilter.toLowerCase())
-      );
-    }
-    
-    // Применяем фильтр по маршруту (куда)
-    if (routeToFilter) {
-      result = result.filter(order => 
-        order.route.to.toLowerCase().includes(routeToFilter.toLowerCase())
-      );
-    }
-
-    // Применяем фильтр по весу
+    // Применяем фильтр по весу (клиентская фильтрация)
     if (minWeightFilter !== null || maxWeightFilter !== null) {
       result = result.filter(order => {
-        // Извлекаем числовое значение из строки веса
         let weightInKg: number;
         
-        // Проверяем, содержит ли строка 'т' (тонны) или 'кг'
         if (order.cargo.weight.includes('т')) {
-          // Если вес указан в тоннах, конвертируем в килограммы
           const weightStr = order.cargo.weight.replace('т', '').trim();
           weightInKg = parseFloat(weightStr) * 1000;
         } else {
-          // Если вес указан в кг или без единиц измерения
           const weightStr = order.cargo.weight.replace('кг', '').trim();
           weightInKg = parseFloat(weightStr);
         }
         
-        // Применяем фильтры
         if (minWeightFilter !== null && maxWeightFilter !== null) {
           return weightInKg >= minWeightFilter && weightInKg <= maxWeightFilter;
         } else if (minWeightFilter !== null) {
@@ -187,7 +238,6 @@ export default function Load() {
       result.sort((a, b) => {
         switch (sortOption) {
           case 'date-desc':
-            // Преобразуем даты для корректного сравнения
             return new Date(b.date.split('.').reverse().join('-')).getTime() - 
                    new Date(a.date.split('.').reverse().join('-')).getTime();
           case 'date-asc':
@@ -210,13 +260,66 @@ export default function Load() {
     // Применяем фильтр по типу транспорта
     if (transportTypeFilter && transportTypeFilter !== 'all') {
       result = result.filter(order => {
-        // Проверяем, соответствует ли тип груза выбранному типу транспорта
         return order.cargo.type === transportTypeFilter;
       });
     }
     
+    // Устанавливаем отфильтрованные результаты
     setFilteredOrders(result);
-  }, [statusFilter, sortOption, routeFromFilter, routeToFilter, minWeightFilter, maxWeightFilter, dateFilter, transportTypeFilter, orders]);
+    
+    // Вычисляем пагинацию для отфильтрованных результатов
+    const totalFiltered = result.length;
+    const totalFilteredPages = Math.ceil(totalFiltered / ORDERS_PER_PAGE);
+    setFilteredTotalPages(totalFilteredPages);
+    
+    // Получаем заказы для текущей страницы отфильтрованных результатов
+    const startIndex = (filteredCurrentPage - 1) * ORDERS_PER_PAGE;
+    const endIndex = startIndex + ORDERS_PER_PAGE;
+    const paginatedResults = result.slice(startIndex, endIndex);
+    setPaginatedFilteredOrders(paginatedResults);
+    
+  }, [minWeightFilter, maxWeightFilter, sortOption, transportTypeFilter, displayedOrders, filteredCurrentPage]);
+
+  // Сброс пагинации при изменении фильтров
+  useEffect(() => {
+    setCurrentPageNumber(1);
+    setDisplayedOrders([]);
+  }, [statusFilter, routeFromFilter, routeToFilter, dateFilter]);
+
+  // Сброс пагинации отфильтрованных результатов при изменении фильтров
+  useEffect(() => {
+    setFilteredCurrentPage(1);
+  }, [minWeightFilter, maxWeightFilter, sortOption, transportTypeFilter, statusFilter, routeFromFilter, routeToFilter, dateFilter]);
+
+  // Функция для загрузки следующей страницы
+  const handleLoadMore = () => {
+    if (showLoadMore) {
+      setCurrentPageNumber(prev => prev + 1);
+    }
+  };
+
+  // Функция для перехода на конкретную страницу отфильтрованных результатов
+  const handleFilteredPageChange = (page: number) => {
+    setFilteredCurrentPage(page);
+  };
+
+  // Генерация номеров страниц для пагинации отфильтрованных результатов
+  const getFilteredPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, filteredCurrentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(filteredTotalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  };
   
   return (
     <div className="max-w-[1366px] mx-auto px-4 py-8 w-full">
@@ -225,17 +328,21 @@ export default function Load() {
         <div className="flex justify-center gap-4 mb-8">
           <button
             onClick={() => setCurrentPage("load")}
-            className={`flex items-center px-6 py-3 rounded-lg transition-colors ${currentPage === "load" 
-              ? "bg-black text-white" 
-              : "bg-gray-100 hover:bg-gray-200 text-gray-800"}`}
+            className={`flex items-center px-6 py-3 rounded-lg transition-colors ${
+              currentPage === "load" 
+                ? "bg-black text-white" 
+                : "bg-gray-100 hover:bg-gray-200 text-gray-800"
+            }`}
           >
             <FaTruck className="mr-2" /> Найти груз
           </button>
           <button
             onClick={() => setCurrentPage("upload")}
-            className={`flex items-center px-6 py-3 rounded-lg transition-colors ${currentPage === "upload" 
-              ? "bg-black text-white" 
-              : "bg-gray-100 hover:bg-gray-200 text-gray-800"}`}
+            className={`flex items-center px-6 py-3 rounded-lg transition-colors ${
+              currentPage === "upload" 
+                ? "bg-black text-white" 
+                : "bg-gray-100 hover:bg-gray-200 text-gray-800"
+            }`}
           >
             <FaBox className="mr-2" /> Разместить груз
           </button>
@@ -254,21 +361,21 @@ export default function Load() {
             >
               <SearchForm 
                 statusFilter={statusFilter} 
-                setStatusFilter={setStatusFilter} // для фильтра по Статусу
+                setStatusFilter={setStatusFilter}
                 sortOption={sortOption} 
-                setSortOption={setSortOption} // для сортировки по различным типам 
+                setSortOption={setSortOption}
                 routeFromFilter={routeFromFilter}
-                setRouteFromFilter={setRouteFromFilter} // для фильтра по месту назначения (от)
+                setRouteFromFilter={setRouteFromFilter}
                 routeToFilter={routeToFilter}
-                setRouteToFilter={setRouteToFilter} // для фильтра по по месту назначения (до)
+                setRouteToFilter={setRouteToFilter}
                 minWeightFilter={minWeightFilter}
-                setMinWeightFilter={setMinWeightFilter} // для фильтра по весу (от)
+                setMinWeightFilter={setMinWeightFilter}
                 maxWeightFilter={maxWeightFilter}
-                setMaxWeightFilter={setMaxWeightFilter} // для фильтра по весу (до)
+                setMaxWeightFilter={setMaxWeightFilter}
                 dateFilter={dateFilter} 
-                setDateFilter={setDateFilter} // для фильтра по дате
+                setDateFilter={setDateFilter}
                 transportTypeFilter={transportTypeFilter}
-                setTransportTypeFilter={setTransportTypeFilter} // для фильтра по типу транспорта
+                setTransportTypeFilter={setTransportTypeFilter}
               />
             </motion.div>
           ) : (
@@ -286,7 +393,16 @@ export default function Load() {
       </div>
 
       <div className="mt-12">
-        <h2 className="text-2xl font-bold mb-6">Доступные заказы</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Доступные заказы</h2>
+          <div className="text-sm text-gray-600">
+            Показано {paginatedFilteredOrders.length} из {filteredOrders.length} заказов
+            {filteredOrders.length !== totalCount && (
+              <span className="text-blue-600"> (всего: {totalCount})</span>
+            )}
+          </div>
+        </div>
+        
         <div className="space-y-4">
           <AnimatePresence>
             {isLoading ? (
@@ -303,10 +419,11 @@ export default function Load() {
                   </motion.div>
                 ))}
               </>
-            ) : filteredOrders.length > 0 ? (
-              filteredOrders.map((order) => (
+            ) : paginatedFilteredOrders.length > 0 ? (
+              paginatedFilteredOrders.map((order, index) => (
                 <motion.div
                   key={order.id}
+                  ref={index === paginatedFilteredOrders.length - 1 ? lastOrderRef : null}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
@@ -327,6 +444,63 @@ export default function Load() {
             )}
           </AnimatePresence>
         </div>
+        
+        {/* Индикатор автоматической загрузки */}
+        {isAutoLoading && (
+          <div className="flex justify-center items-center mt-4 py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-black mr-2"></div>
+            <span className="text-sm text-gray-600">Автоматическая загрузка...</span>
+          </div>
+        )}
+        
+        {/* Пагинация для отфильтрованных результатов */}
+        {filteredTotalPages > 1 && (
+          <div className="flex justify-center items-center mt-8 space-x-2">
+            <button
+              onClick={() => handleFilteredPageChange(filteredCurrentPage - 1)}
+              disabled={filteredCurrentPage === 1}
+              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FaChevronLeft />
+            </button>
+            
+            {getFilteredPageNumbers().map((page) => (
+              <button
+                key={page}
+                onClick={() => handleFilteredPageChange(page)}
+                disabled={filteredCurrentPage === page}
+                className={`px-4 py-2 rounded-lg border transition-colors disabled:cursor-not-allowed  ${
+                  page === filteredCurrentPage
+                    ? 'bg-black text-white border-black'
+                    : 'border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+            
+            <button
+              onClick={() => handleFilteredPageChange(filteredCurrentPage + 1)}
+              disabled={filteredCurrentPage === filteredTotalPages}
+              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FaChevronRight />
+            </button>
+          </div>
+        )}
+        
+        {/* Дополнительная кнопка для загрузки большего количества данных с сервера */}
+        {showLoadMore && filteredOrders.length > 0 && (
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={handleLoadMore}
+              disabled={isOrdersLoading || isAutoLoading}
+              className="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            >
+              {isOrdersLoading || isAutoLoading ? 'Загрузка...' : 'Загрузить больше данных с сервера'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

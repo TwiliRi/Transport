@@ -40,14 +40,21 @@ export const orderRouter = createTRPCRouter({
     }),
     
   // Добавляем новый метод для получения всех заказов
+  // Обновляем метод getAll для поддержки пагинации
   getAll: publicProcedure
     .input(z.object({
       status: z.string().optional(),
       routeFrom: z.string().optional(),
       routeTo: z.string().optional(),
       date: z.string().optional(),
+      page: z.number().min(1).default(1),
+      limit: z.number().min(1).max(50).default(10),
     }).optional())
     .query(async ({ ctx, input }) => {
+      const page = input?.page ?? 1;
+      const limit = input?.limit ?? 10;
+      const skip = (page - 1) * limit;
+      
       // Создаем базовый запрос
       const whereClause: any = {};
       
@@ -74,8 +81,14 @@ export const orderRouter = createTRPCRouter({
         whereClause.date = input.date;
       }
       
-      // Получаем все заказы из базы данных без фильтрации
+      // Получаем общее количество заказов для пагинации
+      const totalCount = await ctx.db.order.count({
+        where: whereClause,
+      });
+      
+      // Получаем заказы с пагинацией
       const orders = await ctx.db.order.findMany({
+        where: whereClause,
         include: {
           user: {
             select: {
@@ -87,9 +100,18 @@ export const orderRouter = createTRPCRouter({
         orderBy: {
           createdAt: 'desc',
         },
+        skip,
+        take: limit,
       });
       
-      return orders;
+      return {
+        orders,
+        totalCount,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        hasNextPage: page < Math.ceil(totalCount / limit),
+        hasPreviousPage: page > 1,
+      };
     }),
   
   // Добавляем новый метод для обновления заказа
@@ -177,4 +199,74 @@ export const orderRouter = createTRPCRouter({
       
       return deletedOrder;
     }),
+    getInfinite: publicProcedure
+    .input(z.object({
+      status: z.string().optional(),
+      routeFrom: z.string().optional(),
+      routeTo: z.string().optional(),
+      date: z.string().optional(),
+      limit: z.number().min(1).max(50).default(10),
+      cursor: z.string().nullish(), // cursor для infinite query
+    }).optional())
+    .query(async ({ ctx, input }) => {
+      const limit = input?.limit ?? 10;
+      
+      // Создаем базовый запрос
+      const whereClause: any = {};
+      
+      // Добавляем фильтры, если они указаны
+      if (input?.status) {
+        whereClause.status = input.status;
+      }
+      
+      if (input?.routeFrom) {
+        whereClause.routeFrom = {
+          contains: input.routeFrom,
+          mode: 'insensitive',
+        };
+      }
+      
+      if (input?.routeTo) {
+        whereClause.routeTo = {
+          contains: input.routeTo,
+          mode: 'insensitive',
+        };
+      }
+      
+      if (input?.date) {
+        whereClause.date = input.date;
+      }
+      
+      // Получаем заказы с cursor-based пагинацией
+      const orders = await ctx.db.order.findMany({
+        where: whereClause,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: limit + 1, // Берем на 1 больше для определения nextCursor
+        cursor: input?.cursor ? { id: input.cursor } : undefined,
+      });
+      
+      let nextCursor: string | undefined = undefined;
+      if (orders.length > limit) {
+        const nextItem = orders.pop(); // Удаляем последний элемент
+        nextCursor = nextItem!.id;
+      }
+      
+      return {
+        orders,
+        nextCursor,
+      };
+    }),
 });
+
+  // Метод для infinite query - добавить перед закрывающей скобкой (строка 202)
+  

@@ -86,8 +86,14 @@ export const transportRouter = createTRPCRouter({
       minCapacity: z.number().optional(),
       maxCapacity: z.number().optional(),
       status: z.string().optional(),
+      page: z.number().min(1).default(1),
+      limit: z.number().min(1).max(50).default(10),
     }).optional())
     .query(async ({ ctx, input }) => {
+      const page = input?.page ?? 1;
+      const limit = input?.limit ?? 10;
+      const skip = (page - 1) * limit;
+      
       const whereClause: any = {};
       
       if (input?.vehicleType && input.vehicleType !== "all") {
@@ -103,20 +109,25 @@ export const transportRouter = createTRPCRouter({
       
       if (input?.minCapacity) {
         whereClause.carryingCapacity = {
-          gte: input.minCapacity, // minCapacity теперь ожидается в кг
+          gte: input.minCapacity,
         };
       }
       
       if (input?.maxCapacity) {
         whereClause.carryingCapacity = {
           ...whereClause.carryingCapacity,
-          lte: input.maxCapacity, // maxCapacity теперь ожидается в кг
+          lte: input.maxCapacity,
         };
       }
       
       if (input?.status) {
         whereClause.status = input.status;
       }
+      
+      // Получаем общее количество записей для пагинации
+      const totalCount = await ctx.db.transport.count({
+        where: whereClause,
+      });
       
       const transports = await ctx.db.transport.findMany({
         where: whereClause,
@@ -131,9 +142,23 @@ export const transportRouter = createTRPCRouter({
         orderBy: {
           createdAt: 'desc',
         },
+        skip,
+        take: limit,
       });
       
-      return transports;
+      const totalPages = Math.ceil(totalCount / limit);
+      const hasMore = page < totalPages;
+      
+      return {
+        transports,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalCount,
+          hasMore,
+          limit,
+        },
+      };
     }),
 
   delete: protectedProcedure
