@@ -65,15 +65,15 @@ export default function EditOrderForm({ order, onClose }: EditOrderFormProps) {
             // Сохраняем структуру серверного объекта, обновляя только нужные поля
             return {
               ...item,
-              route: {
-                from: order.route.from || item.route.from,
-                to: order.route.to || item.route.to,
-              },
-              price: order.price || item.price,
-              date: order.date || item.date,
-              description: order.description || item.description,
-              imageUrl: order.imageUrl || item.imageUrl,
-              status: order.status || item.status,
+              routeFrom: routeFrom,
+              routeTo: routeTo,
+              cargoType: cargoType,
+              cargoWeight: cargoWeight,
+              price: price,
+              date: date,
+              description: description,
+              imageUrl: imageUrl,
+              status: status,
             };
           }
           return item;
