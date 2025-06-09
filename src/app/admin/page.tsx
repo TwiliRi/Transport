@@ -392,7 +392,7 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {orders?.map((order: Order) => (
+                                    {orders?.map((order: any) => (
                     <tr key={order.id} className="border-b hover:bg-gray-50">
                       {editingOrder?.id === order.id ? (
                         // Форма редактирования
@@ -400,8 +400,8 @@ export default function AdminPage() {
                           <td className="px-4 py-2">
                             <input
                               type="text"
-                              value={editingOrder.number}
-                              onChange={(e) => setEditingOrder({...editingOrder, number: e.target.value})}
+                              value={editingOrder?.number}
+                              onChange={(e) => editingOrder && setEditingOrder({...editingOrder, number: e.target.value})}
                               className="w-full px-2 py-1 border rounded"
                             />
                           </td>
@@ -410,15 +410,15 @@ export default function AdminPage() {
                             <div className="space-y-1">
                               <input
                                 type="text"
-                                value={editingOrder.routeFrom}
-                                onChange={(e) => setEditingOrder({...editingOrder, routeFrom: e.target.value})}
+                                value={editingOrder?.routeFrom}
+                                onChange={(e) => editingOrder && setEditingOrder({...editingOrder, routeFrom: e.target.value})}
                                 className="w-full px-2 py-1 border rounded text-sm"
                                 placeholder="Откуда"
                               />
                               <input
                                 type="text"
-                                value={editingOrder.routeTo}
-                                onChange={(e) => setEditingOrder({...editingOrder, routeTo: e.target.value})}
+                                value={editingOrder?.routeTo}
+                                onChange={(e) => editingOrder && setEditingOrder({...editingOrder, routeTo: e.target.value})}
                                 className="w-full px-2 py-1 border rounded text-sm"
                                 placeholder="Куда"
                               />
@@ -427,15 +427,15 @@ export default function AdminPage() {
                           <td className="px-4 py-2">
                             <input
                               type="number"
-                              value={editingOrder.price}
-                              onChange={(e) => setEditingOrder({...editingOrder, price: Number(e.target.value)})}
+                              value={editingOrder?.price}
+                              onChange={(e) => editingOrder && setEditingOrder({...editingOrder, price: Number(e.target.value)})}
                               className="w-full px-2 py-1 border rounded"
                             />
                           </td>
                           <td className="px-4 py-2">
                             <select
-                              value={editingOrder.status}
-                              onChange={(e) => setEditingOrder({...editingOrder, status: e.target.value})}
+                              value={editingOrder?.status}
+                              onChange={(e) => editingOrder && setEditingOrder({...editingOrder, status: e.target.value})}
                               className="w-full px-2 py-1 border rounded"
                             >
                               <option value="active">Активный</option>
@@ -446,29 +446,12 @@ export default function AdminPage() {
                           <td className="px-4 py-2">
                             <input
                               type="text"
-                              value={editingOrder.date}
-                              onChange={(e) => setEditingOrder({...editingOrder, date: e.target.value})}
+                              value={editingOrder?.date}
+                              onChange={(e) => editingOrder && setEditingOrder({...editingOrder, date: e.target.value})}
                               className="w-full px-2 py-1 border rounded"
                             />
                           </td>
-                          <td className="px-4 py-2">
-                            <div className="flex space-x-2">
-                              <button
-                                onClick={handleSaveOrder}
-                                className="text-green-600 hover:text-green-800"
-                                title="Сохранить"
-                              >
-                                <FaSave />
-                              </button>
-                              <button
-                                onClick={() => setEditingOrder(null)}
-                                className="text-gray-600 hover:text-gray-800"
-                                title="Отменить"
-                              >
-                                <FaTimes />
-                              </button>
-                            </div>
-                          </td>
+                          
                         </>
                       ) : (
                         // Обычное отображение
@@ -477,8 +460,8 @@ export default function AdminPage() {
                           <td className="px-4 py-2">{order.user?.name || 'Unknown User'}</td>
                           <td className="px-4 py-2">
                             <div className="text-sm">
-                              <div>От: {order.route?.from}</div>
-                              <div>До: {order.route?.to}</div>
+                              <div>От: {order.routeFrom}</div>
+                              <div>До: {order.routeTo}</div>
                             </div>
                           </td>
                           <td className="px-4 py-2">{order.price} ₽</td>
@@ -494,28 +477,7 @@ export default function AdminPage() {
                           <td className="px-4 py-2 text-sm text-gray-600">
                             {order.createdAt ? formatDate(order.createdAt) : '-'}
                           </td>
-                          <td className="px-4 py-2">
-                            <div className="flex space-x-2">
-                              <button
-                                onClick={() => handleEditOrder(order)}
-                                className="text-blue-600 hover:text-blue-800"
-                                title="Редактировать"
-                              >
-                                <FaEdit />
-                              </button>
-                              <button
-                                onClick={() => handleDelete('order', order.id)}
-                                className={`${
-                                  confirmDelete === `order-${order.id}`
-                                    ? 'text-red-800 bg-red-100 px-2 py-1 rounded'
-                                    : 'text-red-600 hover:text-red-800'
-                                }`}
-                                title={confirmDelete === `order-${order.id}` ? 'Подтвердить удаление' : 'Удалить'}
-                              >
-                                <FaTrash />
-                              </button>
-                            </div>
-                          </td>
+                         
                         </>
                       )}
                     </tr>
@@ -587,20 +549,20 @@ export default function AdminPage() {
           <div>
             <h2 className="text-2xl font-bold mb-6">Управление сообщениями</h2>
             <div className="space-y-4">
-              {messages?.map((message:Message) => (
+            {messages?.map((message: Message) => (
                 <div key={message.id} className="border rounded-lg p-4 hover:bg-gray-50">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center mb-2">
                         <span className="font-medium">
-                          {message.senderName || message.senderEmail}
+                          {message.senderName || message.senderEmail || message.sender?.name || message.sender?.email}
                         </span>
                         <span className="text-gray-500 text-sm ml-2">
                           {formatDate(message.createdAt)}
                         </span>
                       </div>
                       <p className="text-gray-700 mb-2">{message.content}</p>
-                      {/* {message.response?.order && (
+                      {message.response?.order && (
                         <p className="text-sm text-blue-600">
                           Заказ: #{message.response.order.number}
                         </p>
@@ -609,7 +571,7 @@ export default function AdminPage() {
                         <p className="text-sm text-green-600">
                           Транспорт: {message.privateChat.transport.title}
                         </p>
-                      )} */}
+                      )}
                     </div>
                     <button
                       onClick={() => handleDelete('message', message.id)}
@@ -716,7 +678,6 @@ export default function AdminPage() {
                           </td>
                         </>
                       ) : (
-                        // Обычное отображение
                         <>
                           <td className="px-4 py-2 font-medium">{user.name || 'Не указано'}</td>
                           <td className="px-4 py-2">{user.email}</td>

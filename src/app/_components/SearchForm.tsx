@@ -5,9 +5,9 @@ import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { FaSearch } from "react-icons/fa";
 
+import type { OrderStatus, SortOption } from "~/types";
+
 // Типы для грузов
-type OrderStatus = 'active' | 'completed' | 'cancelled' | '';
-type SortOption = 'date-desc' | 'date-asc' | 'price-desc' | 'price-asc' | 'route-from' | 'route-to' | '';
 
 export default function  SearchForm({ 
   statusFilter, 

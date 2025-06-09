@@ -1,8 +1,8 @@
 // ============ ОСНОВНЫЕ ТИПЫ ============
 
 // Статусы
-export type OrderStatus = 'active' | 'completed' | 'cancelled' | 'processing';
-export type TransportStatus = 'active' | 'inactive' | '';
+export type OrderStatus = 'active' | 'completed' | 'cancelled' | 'processing' | "";
+export type TransportStatus = 'active' | 'inactive' | '' | string;
 export type ActivityType = 'order' | 'shipment' | 'payment' | '';
 export type TimeFilter = 'week' | 'month' | 'year' | '';
 
@@ -71,7 +71,7 @@ export interface Order {
   };
   imageUrl?: string;
   description?: string;
-  customerId?: string;
+  customerId?: string; // Добавлено
   user?: {
     id: string;
     name: string;
@@ -115,13 +115,55 @@ export interface ResponsesListProps {
 
 // ============ ИНТЕРФЕЙСЫ ЧАТОВ ============
 
+// Обновляем интерфейс Chat
+export interface Chat {
+  id: string;
+  ownerId: string;
+  clientId: string;
+  transportId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  transport: {
+    title: string;
+    vehicleType: string;
+  };
+  owner: {
+    name: string;
+  };
+  client: {
+    name: string;
+  };
+  messages: any[]; // Добавляем это поле
+}
+
 export interface Message {
   id: string;
   content: string;
   createdAt: Date;
   senderId: string;
-  senderName: string | null;
-  senderEmail: string | null;
+  senderName?: string | null;
+  senderEmail?: string | null;
+  chatType?: string | null;
+  chatId?: string | null;
+  responseId?: string | null;
+  privateChatId?: string | null;
+  sender?: {
+    id: string;
+    name: string | null;
+    email: string | null;
+  };
+  response?: {
+    order?: {
+      id: string;
+      number: string;
+    };
+  };
+  privateChat?: {
+    transport?: {
+      id: string;
+      title: string;
+    };
+  };
 }
 
 export interface ChatProps {
@@ -159,10 +201,10 @@ export interface TransportChatsListProps {
 
 export interface User {
   id: string;
-  name: string | null;
-  email: string | null;
-  phone: string | null;
-  userType: string;
+  name: string | null; // Изменено: может быть null
+  email: string | null; // Изменено: может быть null
+  phone: string | null; // Изменено: может быть null
+  userType: string | null; // Изменено: может быть null
   isAdmin: boolean;
   createdAt?: Date;
   updatedAt?: Date;

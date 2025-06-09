@@ -8,36 +8,37 @@ import { api } from "~/trpc/react";
 import SearchForm from "../_components/SearchForm";
 import CreateForm from "../_components/CreateForm";
 import OrderCard, { OrderCardSkeleton } from "../_components/OrderCard";
+import type { Order, OrderStatus, SortOption } from "~/types";
 
 // Типы для грузов
-type OrderStatus = 'active' | 'completed' | 'cancelled' | '';
-type SortOption = 'date-desc' | 'date-asc' | 'price-desc' | 'price-asc' | 'route-from' | 'route-to' | '';
+// type OrderStatus = 'active' | 'completed' | 'cancelled' | '';
+// type SortOption = 'date-desc' | 'date-asc' | 'price-desc' | 'price-asc' | 'route-from' | 'route-to' | '';
 
-interface Order {
-  id: string;
-  number: string;
-  status: 'active' | 'completed' | 'cancelled' | "processing";
-  date: string;
-  route: {
-    from: string;
-    to: string;
-  };
-  price: number;
-  cargo: {
-    type: string;
-    weight: string;
-  };
-  transportType?: {
-    value: string;
-    label: string;
-  };
-  imageUrl?: string;
-  description?: string;
-  user?: {
-    id: string;
-    name: string;
-  };
-}
+// interface Order {
+//   id: string;
+//   number: string;
+//   status: 'active' | 'completed' | 'cancelled' | "processing";
+//   date: string;
+//   route: {
+//     from: string;
+//     to: string;
+//   };
+//   price: number;
+//   cargo: {
+//     type: string;
+//     weight: string;
+//   };
+//   transportType?: {
+//     value: string;
+//     label: string;
+//   };
+//   imageUrl?: string;
+//   description?: string;
+//   user?: {
+//     id: string;
+//     name: string;
+//   };
+// }
 
 export default function Load() {
   const [currentPage, setCurrentPage] = useState("load");
@@ -96,12 +97,7 @@ export default function Load() {
     }
   }, [showLoadMore, isOrdersLoading, isAutoLoading]);
 
-  // Настройка Intersection Observer для автоматической загрузки
-
-
-  // Добавить после объявления всех состояний, примерно после строки 60
-
-// Принудительный сброс состояния при монтировании компонента
+  
 useEffect(() => {
   // Сброс серверной пагинации
   setCurrentPageNumber(1);
@@ -158,26 +154,23 @@ useEffect(() => {
 
   useEffect(() => {
     if (dbOrdersData) {
-      const formattedOrders: Order[] = dbOrdersData.orders.map((order: Order) => ({
+      const formattedOrders: Order[] = dbOrdersData.orders.map((order) => ({
         id: order.id,
         number: order.number,
         status: order.status as 'active' | 'completed' | 'cancelled',
         date: formatDate(order.date),
         route: {
-          from: order.route.from,
-          to: order.route.to,
+          from: order.routeFrom,
+          to: order.routeTo,
         },
         price: order.price,
         cargo: {
-          type: order.cargo.type,
-          weight: order.cargo.weight,
+          type: order.cargoType,
+          weight: order.cargoWeight,
         },
         description: order.description || undefined,
         imageUrl: order.imageUrl || undefined,
-        user: order.user ? {
-          id: order.user.id,
-          name: order.user.name || "Неизвестный пользователь"
-        } : undefined
+        
       }));
       
       if (currentPageNumber === 1) {

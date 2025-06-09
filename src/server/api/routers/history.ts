@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import type { Order, Transport, Response } from "~/types";
+import type { Order, Transport, Response,  OrderStatus, ActivityType, Chat  } from "~/types";
 
 interface ActivityItem {
   id: string;
@@ -24,6 +24,9 @@ interface ActivityItem {
   createdAt: Date;
 }
 
+// Добавляем импорт типа Chat
+
+
 export const historyRouter = createTRPCRouter({
   getUserActivity: protectedProcedure
     .input(z.object({
@@ -40,7 +43,7 @@ export const historyRouter = createTRPCRouter({
         orderBy: { createdAt: 'desc' },
       });
 
-      orders.forEach((order: Order) => {
+      orders.map((order: any) => {
         activities.push({
           id: `order-${order.id}`,
           type: 'order',
@@ -107,7 +110,7 @@ export const historyRouter = createTRPCRouter({
         orderBy: { createdAt: 'desc' },
       });
 
-      responses.forEach((response: Response & { order: any }) => {
+      responses.forEach((response: any) => {
         activities.push({
           id: `response-${response.id}`,
           type: 'response',
@@ -148,22 +151,7 @@ export const historyRouter = createTRPCRouter({
         orderBy: { createdAt: 'desc' },
       });
 
-      privateChats.forEach((chat: { 
-        id: string;
-        ownerId: string;
-        clientId: string;
-        createdAt: Date;
-        transport: {
-          title: string;
-          vehicleType: string;
-        };
-        owner: {
-          name: string;
-        };
-        client: {
-          name: string;
-        };
-      }) => {
+      privateChats.map((chat: any) => {
         const isOwner = chat.ownerId === userId;
         const otherUser = isOwner ? chat.client : chat.owner;
         

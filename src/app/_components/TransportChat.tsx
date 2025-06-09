@@ -2,20 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { FaSpinner, FaPaperPlane } from "react-icons/fa";
 import { api } from "~/trpc/react";
-
+import type { Message } from "~/types"; // Импортируем глобальный тип
 interface TransportChatProps {
   transportId: string;
   transportTitle?: string;
   driverName?: string;
 }
 
-interface Message {
-  id: string;
-  content: string;
-  createdAt: Date;
-  senderId: string;
-  senderName: string | null;
-}
+
 
 export default function TransportChat({ 
   transportId, 

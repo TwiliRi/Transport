@@ -3,7 +3,7 @@ import { db } from "~/server/db";
 import { FaBox, FaCalendar, FaMapMarkerAlt, FaTruck } from "react-icons/fa";
 import OrderCard from "../../_components/OrderCard";
 import Link from "next/link";
-import type { Order } from "~/types";
+import type { Order, OrderStatus } from "~/types";
 
 export default async function OrdersPage() {
   const session = await auth();
@@ -42,27 +42,29 @@ export default async function OrdersPage() {
   });
   
   // Преобразуем данные из базы в формат для компонента OrderCard
-  const formattedOrders = orders.map((order:Order) => ({
-    id: order.id,
-    number: order.number,
-    status: order.status as 'active' | 'completed' | 'cancelled' | "processing",
-    date: formatDate(order.date),
-    route: {
-      from: order.route.from,
-      to: order.route.to,
-    },
-    price: order.price,
-    cargo: {
-      type: order.cargo.type,
-      weight: order.cargo.weight,
-    },
-    description: order.description || undefined,
-    imageUrl: order.imageUrl || undefined,
-    user: order.user ? {
-      id: order.user.id,
-      name: order.user.name || "Неизвестный пользователь"
-    } : undefined
-  }));
+   // Преобразуем данные из базы в формат для компонента OrderCard
+  // Преобразуем данные из базы в формат для компонента OrderCard
+const formattedOrders: Order[] = orders.map((order: any): Order => ({
+  id: order.id,
+  number: order.number,
+  status: order.status as OrderStatus,
+  date: formatDate(order.date),
+  route: {
+    from: order.routeFrom,
+    to: order.routeTo,
+  },
+  price: order.price,
+  cargo: {
+    type: order.cargoType,
+    weight: order.cargoWeight,
+  },
+  description: order.description || undefined,
+  imageUrl: order.imageUrl || undefined,
+  user: order.user ? {
+    id: order.user.id,
+    name: order.user.name || "Неизвестный пользователь"
+  } : undefined
+}));
   
   // Функция для форматирования даты из ISO в формат DD.MM.YYYY
   function formatDate(dateString: string) {

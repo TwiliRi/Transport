@@ -12,7 +12,6 @@ interface Response {
   message: string;
   createdAt: Date;
   carrierId: string;
-  carrierName: string;
   orderId: string;
   customerId: string;
 }
@@ -54,38 +53,19 @@ export default function ResponsesList({ orderId, customerId }: ResponsesListProp
   });
   
   // Добавьте этот тип в начало файла после импортов
-  type ServerResponse = {
-    id: string;
-    status: string;
-    message: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-    orderId: string;
-    carrierId: string;
-    carrier: {
-      id: string;
-      name: string | null;
-    };
-    order: {
-      userId: string;
-      number: string;
-      routeFrom: string;
-      routeTo: string;
-    };
-  };
+ 
   
   // Обновляем отклики при получении новых данных
   useEffect(() => {
     if (responsesData) {
-      setResponses(responsesData.map((response: ServerResponse): Response => ({
+      setResponses(responsesData.map((response): Response => ({
         id: response.id,
         status: response.status,
         message: response.message ?? '',
         createdAt: response.createdAt,
         carrierId: response.carrierId,
-        carrierName: response.carrier.name ?? '',
         orderId: response.orderId,
-        customerId: response.order.userId
+        customerId: customerId
       })));
       setLoading(false);
     }
@@ -135,7 +115,6 @@ export default function ResponsesList({ orderId, customerId }: ResponsesListProp
         <div key={response.id} className="border border-gray-200 rounded-lg p-4">
           <div className="flex justify-between items-start mb-3">
             <div>
-              <h4 className="font-medium">{response.carrierName || "Перевозчик"}</h4>
               <p className="text-sm text-gray-500">
                 {new Date(response.createdAt).toLocaleDateString()} в{" "}
                 {new Date(response.createdAt).toLocaleTimeString([], {

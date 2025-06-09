@@ -4,25 +4,20 @@ import { useSession } from "next-auth/react";
 import { FaSpinner, FaPaperPlane } from "react-icons/fa";
 import { api } from "~/trpc/react";
 import { formatDate } from "~/utils/formatDate";
+import type { Message } from "~/types"; // Импортируем глобальный тип
 
 interface PrivateTransportChatProps {
   transportId: string;
   ownerId: string;
   transportTitle?: string;
-  existingChatId?: string; // Добавляем новый проп
+  existingChatId?: string;
 }
-interface Message {
-    id: string;
-    content: string;
-    createdAt: Date;
-    senderId: string;
-    senderName: string | null;
-  }
+
 export default function PrivateTransportChat({ 
   transportId, 
   ownerId,
   transportTitle = "Транспорт",
-  existingChatId // Добавляем новый проп
+  existingChatId
 }: PrivateTransportChatProps) {
   const { data: session } = useSession();
   
@@ -223,7 +218,7 @@ export default function PrivateTransportChat({
                   }`}
                 >
                   <div className="text-xs opacity-75 mb-1">
-                    {message.senderName} • {formatDate(message.createdAt)}
+                    {message.senderName ?? 'Пользователь'} • {formatDate(message.createdAt)}
                   </div>
                   <p className="whitespace-pre-line">{message.content}</p>
                 </div>

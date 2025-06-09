@@ -274,15 +274,6 @@ export default function TruckCard({ transport }: TruckCardProps) {
                   </button>
                 )}
 
-                {/* Telegram */}
-                <button
-                  onClick={() => handleServiceSelect("telegram")}
-                  className="flex w-full items-center justify-center gap-3 rounded-lg bg-blue-50 p-4 transition-colors hover:bg-blue-100"
-                >
-                  <FaTelegram className="text-xl text-blue-500" />
-                  <span className="font-medium text-blue-800">Telegram</span>
-                </button>
-
                 {/* WhatsApp */}
                 <button
                   onClick={() => handleServiceSelect("whatsapp")}
@@ -292,17 +283,7 @@ export default function TruckCard({ transport }: TruckCardProps) {
                   <span className="font-medium text-green-800">WhatsApp</span>
                 </button>
 
-                {/* Авито */}
-                <button
-                  onClick={() => handleServiceSelect("avito")}
-                  className="flex w-full items-center justify-center gap-3 rounded-lg bg-yellow-50 p-4 transition-colors hover:bg-yellow-100"
-                >
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-yellow-500">
-                    <span className="text-xs font-bold text-white">А</span>
-                  </div>
-                  <span className="font-medium text-yellow-800">Авито</span>
-                </button>
-
+               
                 {/* Прямой звонок */}
                 <a
                   href={`tel:${transport.phoneNumber}`}

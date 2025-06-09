@@ -401,7 +401,7 @@ createPrivateChatMessage: protectedProcedure
   }),
 
 // Получение списка приватных чатов пользователя
-getUserPrivateChats: protectedProcedure
+  getUserPrivateChats: protectedProcedure
   .query(async ({ ctx }) => {
     const chats = await ctx.db.privateChat.findMany({
       where: {
@@ -439,32 +439,12 @@ getUserPrivateChats: protectedProcedure
       }
     });
     
-    return chats.map((chat: {
-      id: string;
-      transportId: string;
-      transport: {
-        title: string;
-        vehicleType: string;
-      };
-      ownerId: string;
-      owner: {
-        name: string;
-      };
-      client: {
-        name: string;
-      };
-      messages: any[];
-      updatedAt: Date;
-    }) => ({
+    return chats.map((chat) => ({
       id: chat.id,
       transportId: chat.transportId,
-      transportTitle: chat.transport.title,
-      transportType: chat.transport.vehicleType,
-      otherUserName: chat.ownerId === ctx.session.user.id ? chat.client.name : chat.owner.name,
-      lastMessage: chat.messages[0] || null,
       updatedAt: chat.updatedAt
     }));
   }),
 
-    
+
 });

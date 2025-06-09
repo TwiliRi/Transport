@@ -157,7 +157,7 @@ export const responseRouter = createTRPCRouter({
       }
   
       // Используем транзакцию для одновременного обновления отклика и заказа
-      const result = await ctx.db.$transaction(async (prisma: typeof ctx.db) => {
+      const result = await ctx.db.$transaction(async (prisma) => {
         // Обновляем статус отклика
         const updatedResponse = await prisma.response.update({
           where: { id: input.responseId },
@@ -196,66 +196,59 @@ export const responseRouter = createTRPCRouter({
 
   // Получение обновлений для отклика (для SSE)
   getUpdates: protectedProcedure
-    .input(z.object({ orderId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const order = await ctx.db.order.findUnique({
-        where: { id: input.orderId },
-        select: { userId: true },
-      });
+  .input(z.object({ orderId: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const order = await ctx.db.order.findUnique({
+      where: { id: input.orderId },
+      select: { userId: true },
+    });
 
-      if (!order) {
-        throw new Error("Заказ не найден");
-      }
+    if (!order) {
+      throw new Error("Заказ не найден");
+    }
 
-      // Проверяем, что пользователь имеет доступ к этим откликам
-      const responses = await ctx.db.response.findMany({
-        where: {
-          orderId: input.orderId,
-          OR: [
-            { order: { userId: ctx.session.user.id } },
-            { carrierId: ctx.session.user.id }
-          ],
-        },
-        orderBy: {
-          updatedAt: "desc",
-        },
-        include: {
-          carrier: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          order: {
-            select: {
-              userId: true,
-            },
-          },
-          messages: {
-            orderBy: {
-              createdAt: "desc",
-            },
-            take: 1,
+    // Проверяем, что пользователь имеет доступ к этим откликам
+    const responses = await ctx.db.response.findMany({
+      where: {
+        orderId: input.orderId,
+        OR: [
+          { order: { userId: ctx.session.user.id } },
+          { carrierId: ctx.session.user.id }
+        ],
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+      include: {
+        carrier: {
+          select: {
+            id: true,
+            name: true,
           },
         },
-      });
+        order: {
+          select: {
+            userId: true,
+          },
+        },
+        messages: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 1,
+        },
+      },
+    });
 
-      return responses.map((response: {
-        id: string;
-        status: string;
-        carrierId: string;
-        carrier: { name: string };
-        updatedAt: Date;
-        messages: any[];
-      }) => ({
-        id: response.id,
-        status: response.status,
-        carrierId: response.carrierId,
-        carrierName: response.carrier.name,
-        updatedAt: response.updatedAt,
-        lastMessage: response.messages[0] || null
-      }));
-    }),
+    return responses.map((response:any) => ({
+      id: response.id,
+      status: response.status,
+      carrierId: response.carrierId,
+      carrierName: response.carrier.name,
+      updatedAt: response.updatedAt,
+      lastMessage: response.messages[0] || null
+    }));
+  }),
 
   // Удаление отклика
   deleteResponse: protectedProcedure

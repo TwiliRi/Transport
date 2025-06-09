@@ -2,7 +2,7 @@ import Link from "next/link";
 import { auth } from "~/server/auth";
 import { FaUser, FaBox, FaTruck, FaSignOutAlt, FaHistory, FaArrowRight } from "react-icons/fa";
 import { db } from "~/server/db";
-import type { Order } from "~/types";
+import type { Order, OrderStatus } from "~/types";
 
 export default async function Profile() {
   const session = await auth();
@@ -56,17 +56,34 @@ export default async function Profile() {
   });
   
   // Преобразуем данные из базы в формат для отображения
-  const formattedOrders = recentOrders.map((order:Order) => ({
-    id: order.id,
-    number: order.number,
-    status: order.status,
-    date: formatDate(order.date),
-    route: {
-      from: order.route.from,
-      to: order.route.to,
-    },
-    price: order.price,
-  }));
+   // Преобразуем данные из базы в формат для отображения
+  // Преобразуем данные из базы в формат для отображения
+// ... existing code ...
+
+// Преобразуем данные из базы в формат для отображения
+const formattedOrders: Order[] = recentOrders.map((order: any) => ({
+  id: order.id,
+  number: order.number,
+  status: order.status as OrderStatus,
+  date: formatDate(order.date),
+  route: {
+    from: order.routeFrom,
+    to: order.routeTo,
+  },
+  price: order.price,
+  cargo: {
+    type: order.cargoType,
+    weight: order.cargoWeight,
+  },
+  description: order.description || undefined,
+  imageUrl: order.imageUrl || undefined,
+  user: order.user ? {
+    id: order.user.id,
+    name: order.user.name || "Неизвестный пользователь"
+  } : undefined
+}));
+
+// ... existing code ...
   
   // Функция для форматирования даты из ISO в формат DD.MM.YYYY
   function formatDate(dateString: string) {
@@ -154,9 +171,6 @@ export default async function Profile() {
                       </div>
                       <div className="flex justify-between items-center mt-2">
                         <span className="text-sm">{order.route.from} → {order.route.to}</span>
-                        <Link href={`/orders/${order.id}`} className="text-sm text-black hover:underline flex items-center">
-                          Подробнее <FaArrowRight className="ml-1" size={12} />
-                        </Link>
                       </div>
                     </div>
                   ))
