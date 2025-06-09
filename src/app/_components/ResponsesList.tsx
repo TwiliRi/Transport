@@ -53,19 +53,31 @@ export default function ResponsesList({ orderId, customerId }: ResponsesListProp
     },
   });
   
+  // Добавьте этот тип в начало файла после импортов
+  type ServerResponse = {
+    id: string;
+    status: string;
+    message: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    orderId: string;
+    carrierId: string;
+    carrier: {
+      id: string;
+      name: string | null;
+    };
+    order: {
+      userId: string;
+      number: string;
+      routeFrom: string;
+      routeTo: string;
+    };
+  };
+  
   // Обновляем отклики при получении новых данных
   useEffect(() => {
     if (responsesData) {
-      setResponses(responsesData.map((response: { 
-        id: string;
-        status: string;
-        message: string | null;
-        createdAt: Date;
-        carrierId: string;
-        carrier: { name: string | null };
-        orderId: string;
-        order: { userId: string };
-      }) => ({
+      setResponses(responsesData.map((response: ServerResponse): Response => ({
         id: response.id,
         status: response.status,
         message: response.message ?? '',
