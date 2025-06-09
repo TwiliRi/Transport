@@ -86,7 +86,7 @@ export default function PrivateTransportChat({
   useEffect(() => {
     if (initialMessages) {
       setMessages(
-        initialMessages.map((msg) => ({
+        initialMessages.map((msg: Message) => ({
           ...msg,
           createdAt: new Date(msg.createdAt),
         }))

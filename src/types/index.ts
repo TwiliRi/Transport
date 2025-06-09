@@ -72,6 +72,10 @@ export interface Order {
   imageUrl?: string;
   description?: string;
   customerId?: string;
+  user?: {
+    id: string;
+    name: string;
+  };
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -117,6 +121,7 @@ export interface Message {
   createdAt: Date;
   senderId: string;
   senderName: string | null;
+  senderEmail: string | null;
 }
 
 export interface ChatProps {
@@ -148,6 +153,19 @@ export interface ChatItem {
 
 export interface TransportChatsListProps {
   userId: string;
+}
+
+// ============ ИНТЕРФЕЙСЫ ПОЛЬЗОВАТЕЛЕЙ ============
+
+export interface User {
+  id: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  userType: string;
+  isAdmin: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 // ============ ИНТЕРФЕЙСЫ ПРОФИЛЯ ============

@@ -12,26 +12,11 @@ import TransportUploadForm from "../_components/TransportUploadForm";
 import { OrderCardSkeleton } from "../_components/OrderCard";
 import SearchFormCar from "../_components/SearchFormCar";
 
+import type { Transport } from "~/types";
+
 const TRANSPORTS_PER_PAGE = 10;
 
-interface Transport {
-  id: string;
-  title: string;
-  vehicleType: string;
-  carryingCapacity: number;
-  platformLength?: number | null;
-  platformWidth?: number | null;
-  description?: string | null;
-  workPeriod: string;
-  city: string;
-  minOrderTime: string;
-  price: string;
-  driverName: string;
-  phoneNumber: string;
-  imageUrl?: string | null;
-  createdAt: Date;
-  userId?: string;
-}
+
 
 export default function Search() {
   const [currentPage, setCurrentPage] = useState("search");
@@ -126,9 +111,9 @@ export default function Search() {
   // Обработка данных с сервера
   useEffect(() => {
     if (serverData) {
-      const formattedTransports = serverData.transports.map(transport => ({
+      const formattedTransports = serverData.transports.map((transport: Transport) => ({
         ...transport,
-        createdAt: new Date(transport.createdAt),
+        createdAt: transport.createdAt ? new Date(transport.createdAt) : new Date(),
       }));
 
       if (currentPageNumber === 1) {
@@ -204,7 +189,7 @@ export default function Search() {
 
     // Сортируем по дате создания (новые сначала)
     const sorted = [...filtered].sort((a, b) => {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0);
     });
 
     setFilteredTransports(sorted);
@@ -364,7 +349,10 @@ export default function Search() {
                   >
                     <TruckCard
                     key={`${transport.id}-${forceUpdate}`}
-                    transport={transport} />
+                    transport={{
+                      ...transport,
+                      createdAt: transport.createdAt ?? new Date() // Ensure createdAt is always a Date
+                    }} />
                   </motion.div>
                 );
               })}

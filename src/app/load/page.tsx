@@ -158,19 +158,19 @@ useEffect(() => {
 
   useEffect(() => {
     if (dbOrdersData) {
-      const formattedOrders: Order[] = dbOrdersData.orders.map(order => ({
+      const formattedOrders: Order[] = dbOrdersData.orders.map((order: Order) => ({
         id: order.id,
         number: order.number,
         status: order.status as 'active' | 'completed' | 'cancelled',
         date: formatDate(order.date),
         route: {
-          from: order.routeFrom,
-          to: order.routeTo,
+          from: order.route.from,
+          to: order.route.to,
         },
         price: order.price,
         cargo: {
-          type: order.cargoType,
-          weight: order.cargoWeight,
+          type: order.cargo.type,
+          weight: order.cargo.weight,
         },
         description: order.description || undefined,
         imageUrl: order.imageUrl || undefined,

@@ -35,7 +35,7 @@ export default function TransportChatsList({ transportId, onClose }: TransportCh
   const { data: allChats, isLoading, refetch } = api.message.getUserPrivateChats.useQuery();
 
   // Фильтруем чаты только для данного транспорта
-  const transportChats = allChats?.filter(chat => chat.transportId === transportId) || [];
+  const transportChats = allChats?.filter((chat: ChatItem) => chat.transportId === transportId) || [];
 
   const handleChatSelect = (chat: ChatItem) => {
     setSelectedChatId(chat.id);
@@ -94,7 +94,7 @@ export default function TransportChatsList({ transportId, onClose }: TransportCh
         </div>
       ) : (
         <div className="space-y-3 overflow-x-hidden overflow-y-auto max-h-80">
-          {transportChats.map((chat) => (
+          {transportChats.map((chat: ChatItem) => (
             <motion.div
               key={chat.id}
               whileHover={{ scale: 1.02 }}

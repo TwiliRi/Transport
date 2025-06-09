@@ -4,6 +4,7 @@ import { api } from "~/trpc/react";
 import { FaTrash, FaBox, FaTruck, FaComments, FaUsers, FaChartBar, FaEdit, FaSave, FaTimes, FaUserShield, FaUserTimes } from "react-icons/fa";
 import TransportDataGenerator from "../_components/TransportDataGenerator";
 import CargoDataGenerator from "../_components/CargoDataGenerator";
+import type { Order, Transport, User, Message, Response} from "~/types";
 
 type TabType = 'stats' | 'orders' | 'transports' | 'messages' | 'users';
 
@@ -391,7 +392,7 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {orders?.map((order) => (
+                  {orders?.map((order: Order) => (
                     <tr key={order.id} className="border-b hover:bg-gray-50">
                       {editingOrder?.id === order.id ? (
                         // Форма редактирования
@@ -404,7 +405,7 @@ export default function AdminPage() {
                               className="w-full px-2 py-1 border rounded"
                             />
                           </td>
-                          <td className="px-4 py-2">{order.user.name}</td>
+                          <td className="px-4 py-2">{order.user?.name || 'Unknown User'}</td>
                           <td className="px-4 py-2">
                             <div className="space-y-1">
                               <input
@@ -473,11 +474,11 @@ export default function AdminPage() {
                         // Обычное отображение
                         <>
                           <td className="px-4 py-2 font-medium">{order.number}</td>
-                          <td className="px-4 py-2">{order.user.name}</td>
+                          <td className="px-4 py-2">{order.user?.name || 'Unknown User'}</td>
                           <td className="px-4 py-2">
                             <div className="text-sm">
-                              <div>От: {order.routeFrom}</div>
-                              <div>До: {order.routeTo}</div>
+                              <div>От: {order.route?.from}</div>
+                              <div>До: {order.route?.to}</div>
                             </div>
                           </td>
                           <td className="px-4 py-2">{order.price} ₽</td>
@@ -491,7 +492,7 @@ export default function AdminPage() {
                             </span>
                           </td>
                           <td className="px-4 py-2 text-sm text-gray-600">
-                            {formatDate(order.createdAt)}
+                            {order.createdAt ? formatDate(order.createdAt) : '-'}
                           </td>
                           <td className="px-4 py-2">
                             <div className="flex space-x-2">
@@ -543,11 +544,11 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {transports?.map((transport) => (
+                  {transports?.map((transport: Transport) => (
                     <tr key={transport.id} className="border-b hover:bg-gray-50">
                       <td className="px-4 py-2">{transport.title}</td>
                       <td className="px-4 py-2">
-                        {transport.user.name || transport.user.email}
+                        {transport.driverName || 'Unknown Driver'}
                       </td>
                       <td className="px-4 py-2">{transport.vehicleType}</td>
                       <td className="px-4 py-2">{transport.carryingCapacity}т</td>
@@ -560,7 +561,7 @@ export default function AdminPage() {
                           {transport.status}
                         </span>
                       </td>
-                      <td className="px-4 py-2">{formatDate(transport.createdAt)}</td>
+                      <td className="px-4 py-2">{transport.createdAt ? formatDate(transport.createdAt) : '-'}</td>
                       <td className="px-4 py-2">
                         <button
                           onClick={() => handleDelete('transport', transport.id)}
@@ -586,20 +587,20 @@ export default function AdminPage() {
           <div>
             <h2 className="text-2xl font-bold mb-6">Управление сообщениями</h2>
             <div className="space-y-4">
-              {messages?.map((message) => (
+              {messages?.map((message:Message) => (
                 <div key={message.id} className="border rounded-lg p-4 hover:bg-gray-50">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center mb-2">
                         <span className="font-medium">
-                          {message.sender.name || message.sender.email}
+                          {message.senderName || message.senderEmail}
                         </span>
                         <span className="text-gray-500 text-sm ml-2">
                           {formatDate(message.createdAt)}
                         </span>
                       </div>
                       <p className="text-gray-700 mb-2">{message.content}</p>
-                      {message.response?.order && (
+                      {/* {message.response?.order && (
                         <p className="text-sm text-blue-600">
                           Заказ: #{message.response.order.number}
                         </p>
@@ -608,7 +609,7 @@ export default function AdminPage() {
                         <p className="text-sm text-green-600">
                           Транспорт: {message.privateChat.transport.title}
                         </p>
-                      )}
+                      )} */}
                     </div>
                     <button
                       onClick={() => handleDelete('message', message.id)}
@@ -644,7 +645,7 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users?.map((user) => (
+                  {users?.map((user:User) => (
                     <tr key={user.id} className="border-b hover:bg-gray-50">
                       {editingUser && editingUser.id === user.id ? (
                         // Режим редактирования

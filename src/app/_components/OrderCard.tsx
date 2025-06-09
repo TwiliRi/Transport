@@ -12,32 +12,8 @@ import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import Chat from "./Chat";
 
+import type { Order } from '~/types';
 
-interface Order {
-    id: string;
-    number: string;
-    status: 'active' | 'completed' | 'cancelled' | "processing";
-    date: string;
-    route: {
-      from: string;
-      to: string;
-    };
-    price: number;
-    cargo: {
-      type: string;
-      weight: string;
-    };
-    transportType?: {
-      value: string;
-      label: string;
-    };
-    imageUrl?: string; // Добавляем опциональное поле для URL изображения
-    description?: string; 
-    user?: {
-      id: string;
-      name: string;
-    };
-  }
 
 // Компонент скелетона для OrderCard
 export function OrderCardSkeleton() {
@@ -127,7 +103,7 @@ export default function OrderCard({ order }: { order: Order }) {
     // Обновляем информацию о принятом отклике
     useEffect(() => {
       if (acceptedResponseData && acceptedResponseData.length > 0) {
-        const accepted = acceptedResponseData.find(resp => resp.status === 'accepted');
+        const accepted = acceptedResponseData.find((resp: { status: string }) => resp.status === 'accepted');
         if (accepted) {
           setAcceptedResponse({
             id: accepted.id,

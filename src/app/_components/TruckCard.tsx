@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Car from "~/public/car.png";
 import { useState } from "react";
 import {
   FaTruck,

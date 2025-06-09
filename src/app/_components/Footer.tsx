@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import Icon from "../../public/ico.png";
-import Tg from "../../public/tg.png";
-import Vk from "../../public/vk.png";
+import Icon from "../../public/ico.png";  // Используем ico.png вместо несуществующего icon.png
+import Vk from "../../public/vk.png"
+import Tg from "../../public/tg.png"
 
 export default function Footer() {
   return (

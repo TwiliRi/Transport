@@ -61,7 +61,7 @@ export default function TransportChat({
   useEffect(() => {
     if (initialMessages) {
       setMessages(
-        initialMessages.map((msg) => ({
+        initialMessages.map((msg: Message) => ({
           ...msg,
           createdAt: new Date(msg.createdAt),
         }))

@@ -158,7 +158,7 @@ export default function ShipmentsPage() {
       {/* Список транспорта */}
       <div className="space-y-6">
         {transports.length > 0 ? (
-          transports.map((transport) => (
+          transports.map((transport: Transport) => (
             <div key={transport.id} className="mx-auto flex w-full max-w-[1366px] justify-between space-x-4 rounded-lg border border-gray-200 bg-white p-4 shadow-md max-[700px]:flex-col max-[700px]:items-center sm:p-6">
               {/* Левая часть - иконка вместо изображения */}
               <div className="flex-shrink-0">

@@ -3,6 +3,7 @@ import { db } from "~/server/db";
 import { FaBox, FaCalendar, FaMapMarkerAlt, FaTruck } from "react-icons/fa";
 import OrderCard from "../../_components/OrderCard";
 import Link from "next/link";
+import type { Order } from "~/types";
 
 export default async function OrdersPage() {
   const session = await auth();
@@ -41,19 +42,19 @@ export default async function OrdersPage() {
   });
   
   // Преобразуем данные из базы в формат для компонента OrderCard
-  const formattedOrders = orders.map(order => ({
+  const formattedOrders = orders.map((order:Order) => ({
     id: order.id,
     number: order.number,
     status: order.status as 'active' | 'completed' | 'cancelled' | "processing",
     date: formatDate(order.date),
     route: {
-      from: order.routeFrom,
-      to: order.routeTo,
+      from: order.route.from,
+      to: order.route.to,
     },
     price: order.price,
     cargo: {
-      type: order.cargoType,
-      weight: order.cargoWeight,
+      type: order.cargo.type,
+      weight: order.cargo.weight,
     },
     description: order.description || undefined,
     imageUrl: order.imageUrl || undefined,
@@ -89,7 +90,7 @@ export default async function OrdersPage() {
       {/* Список заказов или сообщение, если их нет */}
       <div className="space-y-4">
         {formattedOrders.length > 0 ? (
-          formattedOrders.map((order) => (
+          formattedOrders.map((order:Order) => (
             <OrderCard key={order.id} order={order} />
           ))
         ) : (

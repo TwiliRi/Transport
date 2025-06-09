@@ -6,31 +6,9 @@ import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-interface Order {
-  id: string;
-  number: string;
-  status: 'active' | 'completed' | 'cancelled' | 'processing' ;
-  date: string;
-  route: {
-    from: string;
-    to: string;
-  };
-  price: number;
-  cargo: {
-    type: string;
-    weight: string;
-  };
-  transportType?: {
-    value: string;
-    label: string;
-  };
-  imageUrl?: string; // Добавляем опциональное поле для URL изображения
-  description?: string; 
-  user?: {
-    id: string;
-    name: string;
-  };
-}
+import type {Order} from "~/types"
+
+
 
 interface EditOrderFormProps {
   order: Order;
@@ -82,15 +60,15 @@ export default function EditOrderForm({ order, onClose }: EditOrderFormProps) {
       if (!oldData) return oldData;
       return {
         ...oldData,
-        orders: oldData.orders.map((item) => {
+        orders: oldData.orders.map((item: Order) => {
           if (item.id === order.id) {
             // Сохраняем структуру серверного объекта, обновляя только нужные поля
             return {
               ...item,
-              routeFrom: order.route?.from || item.routeFrom,
-              routeTo: order.route?.to || item.routeTo,
-              cargoType: order.cargo?.type || item.cargoType,
-              cargoWeight: order.cargo?.weight || item.cargoWeight,
+              route: {
+                from: order.route.from || item.route.from,
+                to: order.route.to || item.route.to,
+              },
               price: order.price || item.price,
               date: order.date || item.date,
               description: order.description || item.description,
