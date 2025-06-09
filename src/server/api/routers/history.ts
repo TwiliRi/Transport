@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import type { Order, Transport, Response } from "~/types";
 
 interface ActivityItem {
   id: string;
@@ -39,33 +40,33 @@ export const historyRouter = createTRPCRouter({
         orderBy: { createdAt: 'desc' },
       });
 
-      orders.forEach(order => {
+      orders.forEach((order: Order) => {
         activities.push({
           id: `order-${order.id}`,
           type: 'order',
-          date: new Date(order.createdAt).toLocaleDateString('ru-RU', {
+          date: new Date(order.createdAt || new Date()).toLocaleDateString('ru-RU', {
             day: 'numeric',
             month: 'long',
             year: 'numeric'
           }),
-          time: new Date(order.createdAt).toLocaleTimeString('ru-RU', {
+          time: new Date(order.createdAt || new Date()).toLocaleTimeString('ru-RU', {
             hour: '2-digit',
             minute: '2-digit'
           }),
           title: `Заказ #${order.number} ${order.status === 'active' ? 'создан' : order.status === 'completed' ? 'завершен' : 'отменен'}`,
           details: {
             route: {
-              from: order.routeFrom,
-              to: order.routeTo
+              from: order.route.from,
+              to: order.route.to
             },
             price: order.price,
             cargo: {
-              type: order.cargoType,
-              weight: order.cargoWeight
+              type: order.cargo.type,
+              weight: order.cargo.weight
             },
             status: order.status
           },
-          createdAt: order.createdAt
+          createdAt: order.createdAt || new Date()
         });
       });
 
@@ -75,29 +76,25 @@ export const historyRouter = createTRPCRouter({
         orderBy: { createdAt: 'desc' },
       });
 
-      transports.forEach(transport => {
+      transports.forEach((transport: Transport) => {
         activities.push({
           id: `transport-${transport.id}`,
           type: 'transport',
-          date: new Date(transport.createdAt).toLocaleDateString('ru-RU', {
+          date: new Date(transport.createdAt || new Date()).toLocaleDateString('ru-RU', {
             day: 'numeric',
             month: 'long',
             year: 'numeric'
           }),
-          time: new Date(transport.createdAt).toLocaleTimeString('ru-RU', {
+          time: new Date(transport.createdAt || new Date()).toLocaleTimeString('ru-RU', {
             hour: '2-digit',
             minute: '2-digit'
           }),
-          title: `Объявление о транспорте "${transport.title}" ${transport.status === 'active' ? 'создано' : 'деактивировано'}`,
+          title: `Транспорт "${transport.title}" ${transport.status === 'active' ? 'добавлен' : 'деактивирован'}`,
           details: {
-            cargo: {
-              type: transport.vehicleType,
-              weight: `${transport.carryingCapacity}т`
-            },
-            description: transport.city,
-            status: transport.status
+            description: `${transport.vehicleType}, грузоподъемность: ${transport.carryingCapacity} кг`,
+            status: transport.status || 'active'
           },
-          createdAt: transport.createdAt
+          createdAt: transport.createdAt || new Date()
         });
       });
 
@@ -110,7 +107,7 @@ export const historyRouter = createTRPCRouter({
         orderBy: { createdAt: 'desc' },
       });
 
-      responses.forEach(response => {
+      responses.forEach((response: Response & { order: any }) => {
         activities.push({
           id: `response-${response.id}`,
           type: 'response',
@@ -123,13 +120,12 @@ export const historyRouter = createTRPCRouter({
             hour: '2-digit',
             minute: '2-digit'
           }),
-          title: `Отклик на заказ #${response.order.number} ${response.status === 'pending' ? 'отправлен' : response.status === 'accepted' ? 'принят' : 'отклонен'}`,
+          title: `Отклик на заказ #${response.orderNumber || 'N/A'} ${response.status === 'pending' ? 'отправлен' : response.status === 'accepted' ? 'принят' : 'отклонен'}`,
           details: {
-            route: {
-              from: response.order.routeFrom,
-              to: response.order.routeTo
-            },
-            price: response.order.price,
+            route: response.orderRoute ? {
+              from: response.orderRoute.from,
+              to: response.orderRoute.to
+            } : undefined,
             status: response.status
           },
           createdAt: response.createdAt
@@ -152,7 +148,22 @@ export const historyRouter = createTRPCRouter({
         orderBy: { createdAt: 'desc' },
       });
 
-      privateChats.forEach(chat => {
+      privateChats.forEach((chat: { 
+        id: string;
+        ownerId: string;
+        clientId: string;
+        createdAt: Date;
+        transport: {
+          title: string;
+          vehicleType: string;
+        };
+        owner: {
+          name: string;
+        };
+        client: {
+          name: string;
+        };
+      }) => {
         const isOwner = chat.ownerId === userId;
         const otherUser = isOwner ? chat.client : chat.owner;
         

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "~/server/auth";
 import { FaUser, FaBox, FaTruck, FaSignOutAlt, FaHistory, FaArrowRight } from "react-icons/fa";
 import { db } from "~/server/db";
+import type { Order } from "~/types";
 
 export default async function Profile() {
   const session = await auth();
@@ -55,14 +56,14 @@ export default async function Profile() {
   });
   
   // Преобразуем данные из базы в формат для отображения
-  const formattedOrders = recentOrders.map(order => ({
+  const formattedOrders = recentOrders.map((order:Order) => ({
     id: order.id,
     number: order.number,
     status: order.status,
     date: formatDate(order.date),
     route: {
-      from: order.routeFrom,
-      to: order.routeTo,
+      from: order.route.from,
+      to: order.route.to,
     },
     price: order.price,
   }));
@@ -133,7 +134,7 @@ export default async function Profile() {
               
               <div className="space-y-4">
                 {formattedOrders.length > 0 ? (
-                  formattedOrders.map((order) => (
+                  formattedOrders.map((order:Order) => (
                     <div key={order.id} className="border border-gray-200 rounded-md p-4 hover:bg-gray-50 transition-colors">
                       <div className="flex justify-between mb-2">
                         <span className="font-medium">Заказ #{order.number}</span>

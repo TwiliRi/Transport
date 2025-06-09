@@ -50,7 +50,7 @@ export async function PUT(req: Request) {
     }
     
     // Проверяем, есть ли у пользователя Google OAuth аккаунт
-    const hasGoogleAccount = user.accounts.some(account => account.provider === 'google');
+    const hasGoogleAccount = user.accounts.some((account: { provider: string }) => account.provider === 'google');
     
     // Если у пользователя есть пароль, требуем текущий пароль
     if (user.password) {

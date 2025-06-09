@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { db } from "~/server/db";
+import type { Message } from "~/types";
 
 // Кэш для последних сообщений и данных
 const lastMessageTimestamps = new Map<string, Date>();
@@ -129,12 +130,12 @@ export async function GET(request: NextRequest) {
             lastMessageTimestamps.set(responseId, lastTimestamp);
             
             // Форматируем сообщения
-            const formattedMessages = messages.map(msg => ({
+            const formattedMessages = messages.map((msg:Message) => ({
               id: msg.id,
               content: msg.content,
               createdAt: msg.createdAt,
               senderId: msg.senderId,
-              senderName: msg.sender.name,
+              senderName: msg.senderName
             }));
             
             // Сохраняем в кэш

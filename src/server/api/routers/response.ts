@@ -157,7 +157,7 @@ export const responseRouter = createTRPCRouter({
       }
   
       // Используем транзакцию для одновременного обновления отклика и заказа
-      const result = await ctx.db.$transaction(async (prisma) => {
+      const result = await ctx.db.$transaction(async (prisma: typeof ctx.db) => {
         // Обновляем статус отклика
         const updatedResponse = await prisma.response.update({
           where: { id: input.responseId },
@@ -240,7 +240,14 @@ export const responseRouter = createTRPCRouter({
         },
       });
 
-      return responses.map(response => ({
+      return responses.map((response: {
+        id: string;
+        status: string;
+        carrierId: string;
+        carrier: { name: string };
+        updatedAt: Date;
+        messages: any[];
+      }) => ({
         id: response.id,
         status: response.status,
         carrierId: response.carrierId,

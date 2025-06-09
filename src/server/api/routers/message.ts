@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import type { Message } from "~/types";
 
 // Простой кэш для сообщений
 const messageCache = new Map<string, { data: any; timestamp: number }>();
@@ -38,12 +39,12 @@ export const messageRouter = createTRPCRouter({
       });
       
       // Форматируем данные
-      const formattedMessages = messages.map((message) => ({
+      const formattedMessages = messages.map((message:Message) => ({
         id: message.id,
         content: message.content,
         createdAt: message.createdAt,
         senderId: message.senderId,
-        senderName: message.sender.name,
+        senderName: message.senderName,
       }));
       
       // Сохраняем в кэш
@@ -127,12 +128,12 @@ export const messageRouter = createTRPCRouter({
       });
 
       // Форматируем сообщения для фронтенда
-      return messages.map((message) => ({
+      return messages.map((message:Message) => ({
         id: message.id,
         content: message.content,
         createdAt: message.createdAt,
         senderId: message.senderId,
-        senderName: message.sender.name,
+        senderName: message.senderName,
       }));
     }),
 
@@ -211,12 +212,12 @@ export const messageRouter = createTRPCRouter({
       },
     });
 
-    return messages.map((message) => ({
+    return messages.map((message:Message) => ({
       id: message.id,
       content: message.content,
       createdAt: message.createdAt,
       senderId: message.senderId,
-      senderName: message.sender.name,
+      senderName: message.senderName,
     }));
   }),
 
@@ -345,12 +346,12 @@ getPrivateChatMessages: protectedProcedure
       }
     });
     
-    return messages.map((message) => ({
+    return messages.map((message:Message) => ({
       id: message.id,
       content: message.content,
       createdAt: message.createdAt,
       senderId: message.senderId,
-      senderName: message.sender.name
+      senderName: message.senderName
     }));
   }),
 
@@ -438,7 +439,23 @@ getUserPrivateChats: protectedProcedure
       }
     });
     
-    return chats.map(chat => ({
+    return chats.map((chat: {
+      id: string;
+      transportId: string;
+      transport: {
+        title: string;
+        vehicleType: string;
+      };
+      ownerId: string;
+      owner: {
+        name: string;
+      };
+      client: {
+        name: string;
+      };
+      messages: any[];
+      updatedAt: Date;
+    }) => ({
       id: chat.id,
       transportId: chat.transportId,
       transportTitle: chat.transport.title,
