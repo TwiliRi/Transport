@@ -14,6 +14,36 @@ interface EditOrderFormProps {
   order: Order;
   onClose: () => void;
 }
+type ServerOrder = {
+  id: string;
+  number: string;
+  status: string;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  date: string;
+  routeFrom: string;
+  routeTo: string;
+  price: number;
+  cargoType: string;
+  cargoWeight: string;
+  description: string | null;
+  imageUrl: string | null;
+  user?: {
+    id: string;
+    name: string;
+  };
+};
+
+type ServerOrdersResponse = {
+  orders: ServerOrder[];
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+};
+
 
 export default function EditOrderForm({ order, onClose }: EditOrderFormProps) {
   // Получаем данные о текущем пользователе
@@ -52,34 +82,34 @@ export default function EditOrderForm({ order, onClose }: EditOrderFormProps) {
   
   // Мутация для обновления заказа
   const updateOrderMutation = api.order.update.useMutation({
-  onSuccess: async () => {
-    // Инвалидируем кеш только для конкретного заказа
-    await utils.order.getAll.invalidate();
-    // Обновляем только те данные, которые относятся к текущему заказу
-    utils.order.getAll.setData(undefined, (oldData) => {
-      if (!oldData) return oldData;
-      return {
-        ...oldData,
-        orders: oldData.orders.map((item: Order) => {
-          if (item.id === order.id) {
-            // Сохраняем структуру серверного объекта, обновляя только нужные поля
-            return {
-              ...item,
-              routeFrom: routeFrom,
-              routeTo: routeTo,
-              cargoType: cargoType,
-              cargoWeight: cargoWeight,
-              price: price,
-              date: date,
-              description: description,
-              imageUrl: imageUrl,
-              status: status,
-            };
-          }
-          return item;
-        })
-      };
-    });
+    onSuccess: async () => {
+      // Инвалидируем кеш только для конкретного заказа
+      await utils.order.getAll.invalidate();
+      // Обновляем только те данные, которые относятся к текущему заказу
+      utils.order.getAll.setData(undefined, (oldData: ServerOrdersResponse | undefined): ServerOrdersResponse | undefined => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          orders: oldData.orders.map((item: ServerOrder): ServerOrder => {
+            if (item.id === order.id) {
+              // Используем плоскую структуру данных, как возвращает сервер
+              return {
+                ...item,
+                routeFrom: routeFrom,
+                routeTo: routeTo,
+                cargoType: cargoType,
+                cargoWeight: cargoWeight,
+                price: price,
+                date: date,
+                description: description,
+                imageUrl: imageUrl,
+                status: status,
+              };
+            }
+            return item;
+          })
+        };
+      });
     
     setSuccess(true);
     setIsLoading(false);
