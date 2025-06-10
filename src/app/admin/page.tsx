@@ -4,7 +4,6 @@ import { api } from "~/trpc/react";
 import { FaTrash, FaBox, FaTruck, FaComments, FaUsers, FaChartBar, FaEdit, FaSave, FaTimes, FaUserShield, FaUserTimes } from "react-icons/fa";
 import TransportDataGenerator from "../_components/TransportDataGenerator";
 import CargoDataGenerator from "../_components/CargoDataGenerator";
-import type { Order, Transport, User, Message, Response} from "~/types";
 
 type TabType = 'stats' | 'orders' | 'transports' | 'messages' | 'users';
 
@@ -392,7 +391,7 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                                    {orders?.map((order: any) => (
+                  {orders?.map((order:any) => (
                     <tr key={order.id} className="border-b hover:bg-gray-50">
                       {editingOrder?.id === order.id ? (
                         // Форма редактирования
@@ -401,24 +400,24 @@ export default function AdminPage() {
                             <input
                               type="text"
                               value={editingOrder?.number}
-                              onChange={(e) => editingOrder && setEditingOrder({...editingOrder, number: e.target.value})}
+                              onChange={(e) => setEditingOrder(editingOrder ? {...editingOrder, number: e.target.value} : null)}
                               className="w-full px-2 py-1 border rounded"
                             />
                           </td>
-                          <td className="px-4 py-2">{order.user?.name || 'Unknown User'}</td>
+                          <td className="px-4 py-2">{order.user.name}</td>
                           <td className="px-4 py-2">
                             <div className="space-y-1">
                               <input
                                 type="text"
                                 value={editingOrder?.routeFrom}
-                                onChange={(e) => editingOrder && setEditingOrder({...editingOrder, routeFrom: e.target.value})}
+                                onChange={(e) => setEditingOrder(editingOrder ? {...editingOrder, routeFrom: e.target.value} : null)}
                                 className="w-full px-2 py-1 border rounded text-sm"
                                 placeholder="Откуда"
                               />
                               <input
                                 type="text"
                                 value={editingOrder?.routeTo}
-                                onChange={(e) => editingOrder && setEditingOrder({...editingOrder, routeTo: e.target.value})}
+                                onChange={(e) => setEditingOrder(editingOrder ? {...editingOrder, routeTo: e.target.value} : null)}
                                 className="w-full px-2 py-1 border rounded text-sm"
                                 placeholder="Куда"
                               />
@@ -428,14 +427,14 @@ export default function AdminPage() {
                             <input
                               type="number"
                               value={editingOrder?.price}
-                              onChange={(e) => editingOrder && setEditingOrder({...editingOrder, price: Number(e.target.value)})}
+                              onChange={(e) => setEditingOrder(editingOrder ? {...editingOrder, price: Number(e.target.value)} : null)}
                               className="w-full px-2 py-1 border rounded"
                             />
                           </td>
                           <td className="px-4 py-2">
                             <select
                               value={editingOrder?.status}
-                              onChange={(e) => editingOrder && setEditingOrder({...editingOrder, status: e.target.value})}
+                              onChange={(e) => setEditingOrder(editingOrder ? {...editingOrder, status: e.target.value} : null)}
                               className="w-full px-2 py-1 border rounded"
                             >
                               <option value="active">Активный</option>
@@ -447,17 +446,34 @@ export default function AdminPage() {
                             <input
                               type="text"
                               value={editingOrder?.date}
-                              onChange={(e) => editingOrder && setEditingOrder({...editingOrder, date: e.target.value})}
+                              onChange={(e) => setEditingOrder(editingOrder ? {...editingOrder, date: e.target.value} : null)}
                               className="w-full px-2 py-1 border rounded"
                             />
                           </td>
-                          
+                          <td className="px-4 py-2">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={handleSaveOrder}
+                                className="text-green-600 hover:text-green-800"
+                                title="Сохранить"
+                              >
+                                <FaSave />
+                              </button>
+                              <button
+                                onClick={() => setEditingOrder(null)}
+                                className="text-gray-600 hover:text-gray-800"
+                                title="Отменить"
+                              >
+                                <FaTimes />
+                              </button>
+                            </div>
+                          </td>
                         </>
                       ) : (
                         // Обычное отображение
                         <>
                           <td className="px-4 py-2 font-medium">{order.number}</td>
-                          <td className="px-4 py-2">{order.user?.name || 'Unknown User'}</td>
+                          <td className="px-4 py-2">{order.user.name}</td>
                           <td className="px-4 py-2">
                             <div className="text-sm">
                               <div>От: {order.routeFrom}</div>
@@ -475,9 +491,30 @@ export default function AdminPage() {
                             </span>
                           </td>
                           <td className="px-4 py-2 text-sm text-gray-600">
-                            {order.createdAt ? formatDate(order.createdAt) : '-'}
+                            {formatDate(order.createdAt)}
                           </td>
-                         
+                          <td className="px-4 py-2">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => handleEditOrder(order)}
+                                className="text-blue-600 hover:text-blue-800"
+                                title="Редактировать"
+                              >
+                                <FaEdit />
+                              </button>
+                              <button
+                                onClick={() => handleDelete('order', order.id)}
+                                className={`${
+                                  confirmDelete === `order-${order.id}`
+                                    ? 'text-red-800 bg-red-100 px-2 py-1 rounded'
+                                    : 'text-red-600 hover:text-red-800'
+                                }`}
+                                title={confirmDelete === `order-${order.id}` ? 'Подтвердить удаление' : 'Удалить'}
+                              >
+                                <FaTrash />
+                              </button>
+                            </div>
+                          </td>
                         </>
                       )}
                     </tr>
@@ -506,11 +543,11 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {transports?.map((transport: Transport) => (
+                  {transports?.map((transport:any) => (
                     <tr key={transport.id} className="border-b hover:bg-gray-50">
                       <td className="px-4 py-2">{transport.title}</td>
                       <td className="px-4 py-2">
-                        {transport.driverName || 'Unknown Driver'}
+                        {transport.user.name || transport.user.email}
                       </td>
                       <td className="px-4 py-2">{transport.vehicleType}</td>
                       <td className="px-4 py-2">{transport.carryingCapacity}т</td>
@@ -523,7 +560,7 @@ export default function AdminPage() {
                           {transport.status}
                         </span>
                       </td>
-                      <td className="px-4 py-2">{transport.createdAt ? formatDate(transport.createdAt) : '-'}</td>
+                      <td className="px-4 py-2">{formatDate(transport.createdAt)}</td>
                       <td className="px-4 py-2">
                         <button
                           onClick={() => handleDelete('transport', transport.id)}
@@ -549,13 +586,13 @@ export default function AdminPage() {
           <div>
             <h2 className="text-2xl font-bold mb-6">Управление сообщениями</h2>
             <div className="space-y-4">
-            {messages?.map((message: Message) => (
+              {messages?.map((message:any) => (
                 <div key={message.id} className="border rounded-lg p-4 hover:bg-gray-50">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center mb-2">
                         <span className="font-medium">
-                          {message.senderName || message.senderEmail || message.sender?.name || message.sender?.email}
+                          {message.sender.name || message.sender.email}
                         </span>
                         <span className="text-gray-500 text-sm ml-2">
                           {formatDate(message.createdAt)}
@@ -607,7 +644,7 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users?.map((user:User) => (
+                  {users?.map((user) => (
                     <tr key={user.id} className="border-b hover:bg-gray-50">
                       {editingUser && editingUser.id === user.id ? (
                         // Режим редактирования
@@ -678,6 +715,7 @@ export default function AdminPage() {
                           </td>
                         </>
                       ) : (
+                        // Обычное отображение
                         <>
                           <td className="px-4 py-2 font-medium">{user.name || 'Не указано'}</td>
                           <td className="px-4 py-2">{user.email}</td>
