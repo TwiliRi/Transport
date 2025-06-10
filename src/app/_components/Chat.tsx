@@ -209,7 +209,7 @@ export default function Chat({ responseId, orderId, carrierId, customerId }: Cha
                   }`}
                 >
                   <div className="text-xs text-gray-500 mb-1">
-                    {message.senderName} • {formatDate(message.createdAt)}
+                    {formatDate(message.createdAt)}
                   </div>
                   <p className="whitespace-pre-line">{message.content}</p>
                 </div>

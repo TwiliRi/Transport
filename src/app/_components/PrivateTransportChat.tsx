@@ -35,6 +35,8 @@ export default function PrivateTransportChat({
     transportTitle?: string;
   }>({});
   
+
+  
   // В существующей мутации добавим обработку полученных данных
   const createChatMutation = api.message.getOrCreatePrivateChat.useMutation({
     onSuccess: (chat) => {
@@ -210,7 +212,7 @@ export default function PrivateTransportChat({
         <h3 className="font-medium text-gray-800">
         Приватный чат c {session?.user.id === ownerId 
             ? chatInfo?.clientName || 'пользователем' 
-            : chatInfo?.ownerName || 'владельцем'}
+            : chatInfo?.ownerName || 'водителем'}
         </h3>
       </div>
 
@@ -242,7 +244,7 @@ export default function PrivateTransportChat({
                   }`}
                 >
                   <div className="text-xs opacity-75 mb-1">
-                    {message.senderName ?? 'Пользователь'} • {formatDate(message.createdAt)}
+                     {formatDate(message.createdAt)}
                   </div>
                   <p className="whitespace-pre-line">{message.content}</p>
                 </div>
