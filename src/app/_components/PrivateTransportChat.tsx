@@ -28,15 +28,37 @@ export default function PrivateTransportChat({
   const [chatId, setChatId] = useState<string | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Создаем или получаем приватный чат
+  // Добавим новые состояния для хранения информации о чате
+  const [chatInfo, setChatInfo] = useState<{
+    ownerName?: string | null;
+    clientName?: string | null;
+    transportTitle?: string;
+  }>({});
+  
+  // В существующей мутации добавим обработку полученных данных
   const createChatMutation = api.message.getOrCreatePrivateChat.useMutation({
     onSuccess: (chat) => {
       setChatId(chat.id);
+      // Сохраняем информацию о пользователях
+      setChatInfo({
+        ownerName: chat.owner?.name,
+        clientName: chat.client?.name,
+        transportTitle: chat.transport?.title || transportTitle
+      });
     },
     onError: (err) => {
       setError(`Ошибка создания чата: ${err.message}`);
     }
   });
+  
+  // В компоненте отображения заголовка чата
+  <div className="p-3 border-b border-gray-200 bg-gray-50">
+    <h3 className="font-medium text-gray-800">
+      Приватный чат: {session?.user.id === ownerId 
+        ? chatInfo.clientName || 'Пользователь' 
+        : chatInfo.ownerName || 'Владелец'}
+    </h3>
+  </div>
 
   // Получение сообщений чата
   const { 
@@ -186,7 +208,9 @@ export default function PrivateTransportChat({
       {/* Заголовок чата */}
       <div className="p-3 border-b border-gray-200 bg-gray-50">
         <h3 className="font-medium text-gray-800">
-          Приватный чат: {transportTitle}
+        Приватный чат c {session?.user.id === ownerId 
+            ? chatInfo?.clientName || 'пользователем' 
+            : chatInfo?.ownerName || 'владельцем'}
         </h3>
       </div>
 

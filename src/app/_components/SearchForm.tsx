@@ -61,10 +61,10 @@ export default function  SearchForm({
         if (!response.ok) {
           throw new Error('Не удалось загрузить список городов');
         }
-        const citiesData = await response.json();
-        // Извлекаем только названия городов и сортируем их
-        const cityNames = citiesData.map((city: { name: string , subject:string} ) => city.name + ", " + city.subject).sort();
-        setRussianCities(cityNames);
+      const citiesData = await response.json();
+      // Извлекаем только названия городов и сортируем их
+      const cityNames = citiesData.map((city: { name: string , subject:string} ) => city.name).sort();
+      setRussianCities(cityNames);
         
       } catch (error) {
         console.error('Ошибка при загрузке списка городов:', error);

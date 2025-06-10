@@ -10,35 +10,7 @@ import CreateForm from "../_components/CreateForm";
 import OrderCard, { OrderCardSkeleton } from "../_components/OrderCard";
 import type { Order, OrderStatus, SortOption } from "~/types";
 
-// Типы для грузов
-// type OrderStatus = 'active' | 'completed' | 'cancelled' | '';
-// type SortOption = 'date-desc' | 'date-asc' | 'price-desc' | 'price-asc' | 'route-from' | 'route-to' | '';
 
-// interface Order {
-//   id: string;
-//   number: string;
-//   status: 'active' | 'completed' | 'cancelled' | "processing";
-//   date: string;
-//   route: {
-//     from: string;
-//     to: string;
-//   };
-//   price: number;
-//   cargo: {
-//     type: string;
-//     weight: string;
-//   };
-//   transportType?: {
-//     value: string;
-//     label: string;
-//   };
-//   imageUrl?: string;
-//   description?: string;
-//   user?: {
-//     id: string;
-//     name: string;
-//   };
-// }
 
 export default function Load() {
   const [currentPage, setCurrentPage] = useState("load");
@@ -154,7 +126,7 @@ useEffect(() => {
 
   useEffect(() => {
     if (dbOrdersData) {
-      const formattedOrders: Order[] = dbOrdersData.orders.map((order) => ({
+      const formattedOrders: Order[] = dbOrdersData.orders.map((order:any) => ({
         id: order.id,
         number: order.number,
         status: order.status as 'active' | 'completed' | 'cancelled',
@@ -170,7 +142,11 @@ useEffect(() => {
         },
         description: order.description || undefined,
         imageUrl: order.imageUrl || undefined,
-        
+        // Добавляем недостающее поле:
+        user: order.user ? {
+          id: order.user.id,
+          name: order.user.name || "Неизвестный пользователь"
+        } : undefined
       }));
       
       if (currentPageNumber === 1) {

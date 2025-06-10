@@ -181,7 +181,7 @@ export default function Chat({ responseId, orderId, carrierId, customerId }: Cha
   return (
     <div className="bg-gray-50 rounded-lg border border-gray-200">
       <div className="p-3 border-b border-gray-200">
-        <h4 className="font-medium">Чат</h4>
+        <h4 className="font-medium">Чат с пользователем</h4>
       </div>
       
       <div 

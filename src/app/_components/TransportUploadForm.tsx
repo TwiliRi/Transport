@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { api } from "~/trpc/react";
 import { FaCamera } from "react-icons/fa";
 
@@ -12,23 +13,24 @@ interface TransportUploadFormProps {
 
 export default function TransportUploadForm({ onSuccessCallback }: TransportUploadFormProps) {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   
   // Состояния для всех полей формы
   const [formData, setFormData] = useState({
     title: "",
     driverName: "",
     phoneNumber: "",
-    vehicleType: "",
+    vehicleType: "truck", // Устанавливаем грузовик по умолчанию
     carryingCapacity: 0,
     platformLength: 0,
     platformWidth: 0,
     description: "",
     workPeriodStart: new Date().toISOString().split("T")[0],
     workPeriodEnd: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-
     city: "",
     minOrderTime: 1,
     price: "договорная"
@@ -89,11 +91,12 @@ export default function TransportUploadForm({ onSuccessCallback }: TransportUplo
     onSuccess: () => {
       setIsSubmitting(false);
       // Сброс формы к начальным значениям
+      // В функции onSuccess мутации createTransport
       setFormData({
         title: "",
         driverName: "",
         phoneNumber: "",
-        vehicleType: "",
+        vehicleType: "truck", // Устанавливаем грузовик по умолчанию и после сброса
         carryingCapacity: 0,
         platformLength: 0,
         platformWidth: 0,
@@ -174,11 +177,97 @@ export default function TransportUploadForm({ onSuccessCallback }: TransportUplo
     }
   };
 
+  // Функция валидации формы
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    
+    // Проверка авторизации
+    if (status === "unauthenticated") {
+      setError("Ты не залогинен: Сперва нужно войти в аккаунт");
+      return false;
+    }
+    
+    if (status === "loading") {
+      setError("Проверка авторизации...");
+      return false;
+    }
+    
+    // Проверка обязательных полей
+    if (!formData.title.trim()) {
+      errors.title = "Название объявления обязательно";
+    }
+    
+    if (!formData.driverName.trim()) {
+      errors.driverName = "ФИО водителя обязательно";
+    } else if (formData.driverName.trim().length < 3) {
+      errors.driverName = "ФИО должно содержать минимум 3 символа";
+    }
+    
+    if (!formData.phoneNumber.trim()) {
+      errors.phoneNumber = "Номер телефона обязателен";
+    } else if (!/^\+?[0-9]{10,11}$/.test(formData.phoneNumber.replace(/\s/g, ''))) {
+      errors.phoneNumber = "Некорректный формат номера телефона";
+    }
+    
+    if (!formData.vehicleType) {
+      errors.vehicleType = "Выберите тип транспорта";
+    }
+    
+    if (formData.carryingCapacity <= 0) {
+      errors.carryingCapacity = "Грузоподъёмность должна быть больше 0";
+    }
+    
+    if (!formData.city.trim()) {
+      errors.city = "Город обязателен";
+    }
+    
+    if (!formData.workPeriodStart) {
+      errors.workPeriodStart = "Дата начала работы обязательна";
+    }
+    
+    if (!formData.workPeriodEnd) {
+      errors.workPeriodEnd = "Дата окончания работы обязательна";
+    }
+    
+    if (formData.workPeriodStart && formData.workPeriodEnd) {
+      const startDate = new Date(formData.workPeriodStart);
+      const endDate = new Date(formData.workPeriodEnd);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (startDate < today) {
+        errors.workPeriodStart = "Дата начала не может быть в прошлом";
+      }
+      
+      if (endDate <= startDate) {
+        errors.workPeriodEnd = "Дата окончания должна быть позже даты начала";
+      }
+    }
+    
+    if (formData.minOrderTime < 1) {
+      errors.minOrderTime = "Минимальное время заказа должно быть не менее 1 часа";
+    }
+    
+    if (!formData.price.trim()) {
+      errors.price = "Цена обязательна";
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   // Обработчик отправки формы
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setError(null);
+    setValidationErrors({});
+    
+    // Проверяем валидность формы
+    if (!validateForm()) {
+      return;
+    }
+    
+    setIsSubmitting(true);
     
     // Формируем период работы из двух дат
     const workPeriod = `${formData.workPeriodStart} - ${formData.workPeriodEnd}`;
@@ -200,6 +289,24 @@ export default function TransportUploadForm({ onSuccessCallback }: TransportUplo
       imageUrl: previewImage || undefined
     });
   };
+
+  // Показываем сообщение о необходимости авторизации
+  if (status === "unauthenticated") {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+        <div className="p-4 bg-red-100 text-red-700 rounded-lg mb-4">
+          <h3 className="font-semibold mb-2">Требуется авторизация</h3>
+          <p>Для размещения объявления необходимо войти в аккаунт</p>
+        </div>
+        <button
+          onClick={() => router.push('/signin')}
+          className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+        >
+          Войти в аккаунт
+        </button>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
@@ -245,9 +352,16 @@ export default function TransportUploadForm({ onSuccessCallback }: TransportUplo
               value={formData.title}
               onChange={handleChange}
               placeholder="Например: Газель Next в поисках работы"
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
+              className={`w-full px-4 py-2 rounded-lg border transition-shadow ${
+                validationErrors.title 
+                  ? 'border-red-300 focus:ring-red-500' 
+                  : 'border-gray-200 focus:ring-black'
+              } focus:outline-none focus:ring-2`}
               required
             />
+            {validationErrors.title && (
+              <p className="text-red-500 text-sm mt-1">{validationErrors.title}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -258,13 +372,20 @@ export default function TransportUploadForm({ onSuccessCallback }: TransportUplo
                 name="driverName"
                 value={formData.driverName}
                 placeholder="Иванов Иван Иванович"
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
+                className={`w-full px-4 py-2 rounded-lg border transition-shadow ${
+                  validationErrors.driverName 
+                    ? 'border-red-300 focus:ring-red-500' 
+                    : 'border-gray-200 focus:ring-black'
+                } focus:outline-none focus:ring-2`}
                 onChange={(e) => {
                   e.target.value = e.target.value.replace(/[^а-яА-Яa-zA-Z\s]/g, '');
                   handleChange(e);
                 }}
                 required
               />
+              {validationErrors.driverName && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.driverName}</p>
+              )}
             </div>
 
             <div>
@@ -276,10 +397,17 @@ export default function TransportUploadForm({ onSuccessCallback }: TransportUplo
                 onChange={handleChange}
                 pattern="^\+?[0-9]{10,11}$"
                 placeholder="+7 999 999 99 99"
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
+                className={`w-full px-4 py-2 rounded-lg border transition-shadow ${
+                  validationErrors.phoneNumber 
+                    ? 'border-red-300 focus:ring-red-500' 
+                    : 'border-gray-200 focus:ring-black'
+                } focus:outline-none focus:ring-2`}
                 required
                 maxLength={12}
               />
+              {validationErrors.phoneNumber && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.phoneNumber}</p>
+              )}
             </div>
           </div>
 
@@ -290,15 +418,22 @@ export default function TransportUploadForm({ onSuccessCallback }: TransportUplo
                 name="vehicleType"
                 value={formData.vehicleType}
                 onChange={handleChange}
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
+                className={`w-full px-4 py-2 rounded-lg border transition-shadow ${
+                  validationErrors.vehicleType 
+                    ? 'border-red-300 focus:ring-red-500' 
+                    : 'border-gray-200 focus:ring-black'
+                } focus:outline-none focus:ring-2`}
                 required
               >
-                 {cargoTypes.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
+                {cargoTypes.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
               </select>
+              {validationErrors.vehicleType && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.vehicleType}</p>
+              )}
             </div>
 
             <div>
@@ -306,20 +441,27 @@ export default function TransportUploadForm({ onSuccessCallback }: TransportUplo
               <input
                 type="number"
                 name="carryingCapacity"
-                value={formData.carryingCapacity || ''} // Теперь значение хранится и отображается в кг
+                value={formData.carryingCapacity || ''}
                 onChange={(e) => {
                   const value = parseFloat(e.target.value);
                   setFormData({
                     ...formData,
-                    carryingCapacity: value || 0 // Сохраняем в кг
+                    carryingCapacity: value || 0
                   });
                 }}
                 min="0"
-                max="100000" // Максимальное значение в кг
-                placeholder="1500" // Пример в кг
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
+                max="100000"
+                placeholder="1500"
+                className={`w-full px-4 py-2 rounded-lg border transition-shadow ${
+                  validationErrors.carryingCapacity 
+                    ? 'border-red-300 focus:ring-red-500' 
+                    : 'border-gray-200 focus:ring-black'
+                } focus:outline-none focus:ring-2`}
                 required
               />
+              {validationErrors.carryingCapacity && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.carryingCapacity}</p>
+              )}
             </div>
           </div>
 
@@ -376,17 +518,31 @@ export default function TransportUploadForm({ onSuccessCallback }: TransportUplo
                 name="workPeriodStart"
                 value={formData.workPeriodStart}
                 onChange={handleChange}
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
+                className={`w-full px-4 py-2 rounded-lg border transition-shadow ${
+                  validationErrors.workPeriodStart 
+                    ? 'border-red-300 focus:ring-red-500' 
+                    : 'border-gray-200 focus:ring-black'
+                } focus:outline-none focus:ring-2`}
                 required
               />
+              {validationErrors.workPeriodStart && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.workPeriodStart}</p>
+              )}
               <input
                 type="date"
                 name="workPeriodEnd"
                 value={formData.workPeriodEnd}
                 onChange={handleChange}
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
+                className={`w-full px-4 py-2 rounded-lg border transition-shadow ${
+                  validationErrors.workPeriodEnd 
+                    ? 'border-red-300 focus:ring-red-500' 
+                    : 'border-gray-200 focus:ring-black'
+                } focus:outline-none focus:ring-2`}
                 required
               />
+              {validationErrors.workPeriodEnd && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.workPeriodEnd}</p>
+              )}
             </div>
           </div>
 
@@ -399,11 +555,18 @@ export default function TransportUploadForm({ onSuccessCallback }: TransportUplo
                 value={formData.city}
                 onChange={handleCityChange}
                 placeholder="Рязань"
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
+                className={`w-full px-4 py-2 rounded-lg border transition-shadow ${
+                  validationErrors.city 
+                    ? 'border-red-300 focus:ring-red-500' 
+                    : 'border-gray-200 focus:ring-black'
+                } focus:outline-none focus:ring-2`}
                 required
                 onFocus={() => citySuggestions.length > 0 && setShowCitySuggestions(true)}
                 onBlur={() => setTimeout(() => setShowCitySuggestions(false), 200)}
               />
+              {validationErrors.city && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.city}</p>
+              )}
               {showCitySuggestions && citySuggestions.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                   {citySuggestions.map((city, index) => (
@@ -430,11 +593,18 @@ export default function TransportUploadForm({ onSuccessCallback }: TransportUplo
                 onChange={handleChange}
                 min="1"
                 placeholder="2"
-                className="w-20 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
+                className={`w-20 px-4 py-2 rounded-lg border transition-shadow ${
+                  validationErrors.minOrderTime 
+                    ? 'border-red-300 focus:ring-red-500' 
+                    : 'border-gray-200 focus:ring-black'
+                } focus:outline-none focus:ring-2`}
                 required
               />
               <span className="text-gray-600">ч.</span>
             </div>
+            {validationErrors.minOrderTime && (
+              <p className="text-red-500 text-sm mt-1">{validationErrors.minOrderTime}</p>
+            )}
           </div>
           
           <div>
@@ -445,9 +615,16 @@ export default function TransportUploadForm({ onSuccessCallback }: TransportUplo
               value={formData.price}
               onChange={handleChange}
               placeholder="Договорная"
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
+              className={`w-full px-4 py-2 rounded-lg border transition-shadow ${
+                validationErrors.price 
+                  ? 'border-red-300 focus:ring-red-500' 
+                  : 'border-gray-200 focus:ring-black'
+              } focus:outline-none focus:ring-2`}
               required
             />
+            {validationErrors.price && (
+              <p className="text-red-500 text-sm mt-1">{validationErrors.price}</p>
+            )}
           </div>
         </div>
       </div>

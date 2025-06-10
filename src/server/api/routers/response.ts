@@ -28,6 +28,7 @@ export const responseRouter = createTRPCRouter({
                 number: true,
                 routeFrom: true,
                 routeTo: true,
+                
               },
             },
           },

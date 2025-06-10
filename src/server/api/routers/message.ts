@@ -274,7 +274,7 @@ createTransportMessage: protectedProcedure
     };
   }),
 
-  getOrCreatePrivateChat: protectedProcedure
+      getOrCreatePrivateChat: protectedProcedure
   .input(z.object({ 
     transportId: z.string(),
     ownerId: z.string()
@@ -295,6 +295,23 @@ createTransportMessage: protectedProcedure
           ownerId: input.ownerId,
           clientId: clientId
         }
+      },
+      include: {
+        owner: {
+          select: {
+            name: true
+          }
+        },
+        client: {
+          select: {
+            name: true
+          }
+        },
+        transport: {
+          select: {
+            title: true
+          }
+        }
       }
     });
     
@@ -305,6 +322,23 @@ createTransportMessage: protectedProcedure
           transportId: input.transportId,
           ownerId: input.ownerId,
           clientId: clientId
+        },
+        include: {
+          owner: {
+            select: {
+              name: true
+            }
+          },
+          client: {
+            select: {
+              name: true
+            }
+          },
+          transport: {
+            select: {
+              title: true
+            }
+          }
         }
       });
     }
@@ -401,7 +435,7 @@ createPrivateChatMessage: protectedProcedure
   }),
 
 // Получение списка приватных чатов пользователя
-  getUserPrivateChats: protectedProcedure
+    getUserPrivateChats: protectedProcedure
   .query(async ({ ctx }) => {
     const chats = await ctx.db.privateChat.findMany({
       where: {
@@ -439,10 +473,14 @@ createPrivateChatMessage: protectedProcedure
       }
     });
     
-    return chats.map((chat) => ({
+    return chats.map((chat:any) => ({
       id: chat.id,
       transportId: chat.transportId,
-      updatedAt: chat.updatedAt
+      updatedAt: chat.updatedAt,
+      ownerName: chat.owner.name,
+      clientName: chat.client.name,
+      // Добавляем также информацию о последнем сообщении, если оно есть
+      lastMessage: chat.messages[0] || null
     }));
   }),
 

@@ -14,6 +14,10 @@ interface Response {
   carrierId: string;
   orderId: string;
   customerId: string;
+  carrier?: {
+    id: string;
+    name: string;
+  };
 }
 
 interface ResponsesListProps {
@@ -58,14 +62,15 @@ export default function ResponsesList({ orderId, customerId }: ResponsesListProp
   // Обновляем отклики при получении новых данных
   useEffect(() => {
     if (responsesData) {
-      setResponses(responsesData.map((response): Response => ({
+      setResponses(responsesData.map((response:any) => ({
         id: response.id,
         status: response.status,
         message: response.message ?? '',
         createdAt: response.createdAt,
         carrierId: response.carrierId,
         orderId: response.orderId,
-        customerId: customerId
+        customerId: customerId,
+        carrier: response.carrier
       })));
       setLoading(false);
     }
@@ -116,6 +121,7 @@ export default function ResponsesList({ orderId, customerId }: ResponsesListProp
           <div className="flex justify-between items-start mb-3">
             <div>
               <p className="text-sm text-gray-500">
+              {response.carrier?.name || 'Неизвестный перевозчик'} • 
                 {new Date(response.createdAt).toLocaleDateString()} в{" "}
                 {new Date(response.createdAt).toLocaleTimeString([], {
                   hour: "2-digit",

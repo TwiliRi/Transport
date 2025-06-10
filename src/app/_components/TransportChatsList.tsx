@@ -67,7 +67,6 @@ export default function TransportChatsList({ transportId, onClose }: TransportCh
           >
             ← Назад к списку
           </button>
-          <h5 className="font-semibold">Чат с {selectedChat.otherUserName}</h5>
         </div>
         <PrivateTransportChat
           transportId={transportId}
@@ -105,7 +104,7 @@ export default function TransportChatsList({ transportId, onClose }: TransportCh
                 <div className="flex-1">
                   <div className="flex items-center mb-2">
                     <FaUser className="text-gray-500 mr-2" />
-                    <span className="font-medium">{chat.otherUserName || "Неизвестный пользователь"}</span>
+                    <span className="font-medium">{chat.ownerName || "Неизвестный пользователь"}</span>
                   </div>
                   
                   {chat.lastMessage ? (

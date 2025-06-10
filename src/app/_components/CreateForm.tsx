@@ -1,11 +1,14 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { api } from "~/trpc/react";
 import OrderCard from "./OrderCard";
 
 export default function CreateForm() {
+    const { data: session, status } = useSession();
+    
     // Добавляем состояние для типа транспорта
-    const [transportType, setTransportType] = useState<string>("all");
+    const [transportType, setTransportType] = useState<string>("truck");
     
     // Состояние для хранения списка городов
     const [russianCities, setRussianCities] = useState<string[]>([]);
@@ -239,8 +242,26 @@ export default function CreateForm() {
     // Получаем текущую дату для установки минимальной даты в поле выбора даты
     const today = new Date().toISOString().split('T')[0];
   
+    // Показываем сообщение о необходимости авторизации
+    if (status === "unauthenticated") {
+        return (
+            <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+                <div className="p-4 bg-red-100 text-red-700 rounded-lg mb-4">
+                    <h3 className="font-semibold mb-2">Требуется авторизация</h3>
+                    <p>Для размещения груза необходимо войти в аккаунт</p>
+                </div>
+                <button
+                    onClick={() => router.push('/signin')}
+                    className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                >
+                    Войти в аккаунт
+                </button>
+            </div>
+        );
+    }
+
     return (
-      <form className="space-y-6 p-4 bg-white rounded-lg" onSubmit={handleSubmit}>
+        <form className="space-y-6 p-4 bg-white rounded-lg" onSubmit={handleSubmit}>
         {error && (
           <div className="p-3 bg-red-50 text-red-600 rounded-md">
             {error}
@@ -366,7 +387,6 @@ export default function CreateForm() {
               value={transportType}
               onChange={(e) => setTransportType(e.target.value)}
             >
-              <option value="" disabled>Выберите тип транспорта</option>
               <option value="truck">Грузовик</option>
               <option value="truck_with_trailer">Фура</option>
               <option value="car">Легковой автомобиль</option>
