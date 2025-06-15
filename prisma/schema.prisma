@@ -62,6 +62,7 @@ model User {
   phone         String?   // Добавляем поле телефона
   userType      String?   // Тип пользователя: "carrier" (перевозчик) или "customer" (заказчик)
   isAdmin       Boolean   @default(false) // Добавляем поле для админских прав
+  createdAt     DateTime  @default(now()) // Добавляем дату регистрации
   accounts      Account[]
   sessions      Session[]
   posts         Post[]

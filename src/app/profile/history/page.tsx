@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { FaCalendar, FaMapMarkerAlt, FaTruck, FaBox, FaMoneyBillWave } from "react-icons/fa";
+import { FaCalendar, FaMapMarkerAlt, FaTruck, FaBox, FaMoneyBillWave, FaComments, FaReply, FaEnvelope } from "react-icons/fa";
 import { api } from "~/trpc/react";
 
 // Типы для истории активности
@@ -10,7 +10,7 @@ type TimeFilter = 'week' | 'month' | 'year' | '';
 
 interface Activity {
   id: string;
-  type: 'order' | 'transport' | 'response' | 'message' | 'chat'; // Исправлено: убрал 'shipment' и 'payment', добавил правильные типы
+  type: 'order' | 'transport' | 'response' | 'message' | 'chat';
   date: string;
   time: string;
   title: string;
@@ -25,6 +25,7 @@ interface Activity {
       weight: string;
     };
     status?: string;
+    description?: string;
   };
 }
 
@@ -48,6 +49,21 @@ export default function HistoryPage() {
     setTimeFilter(e.target.value as TimeFilter);
   };
 
+  // Карта для перевода статусов на русский
+  const statusMap: { [key: string]: string } = {
+    pending: 'В ожидании',
+    completed: 'Завершено',
+    cancelled: 'Отменено',
+    active: 'Активно',
+    new: 'Новое',
+    read: 'Прочитано',
+    unread: 'Непрочитано',
+    delivered: 'Доставлено',
+    in_progress: 'В процессе',
+    accepted: 'Принято',
+    rejected: 'Отклонено'
+  };
+
   // Функция для отображения иконки в зависимости от типа активности
   const renderActivityIcon = (type: string) => {
     switch (type) {
@@ -57,20 +73,36 @@ export default function HistoryPage() {
             <FaBox className="text-blue-600 text-xs" />
           </div>
         );
-      case 'shipment':
+      case 'transport':
         return (
           <div className="absolute -left-11 mt-1.5 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
             <FaTruck className="text-green-600 text-xs" />
           </div>
         );
-      case 'payment':
+      case 'response':
         return (
-          <div className="absolute -left-11 mt-1.5 w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center">
-            <FaMoneyBillWave className="text-yellow-600 text-xs" />
+          <div className="absolute -left-11 mt-1.5 w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+            <FaReply className="text-purple-600 text-xs" />
+          </div>
+        );
+      case 'message':
+        return (
+          <div className="absolute -left-11 mt-1.5 w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center">
+            <FaEnvelope className="text-orange-600 text-xs" />
+          </div>
+        );
+      case 'chat':
+        return (
+          <div className="absolute -left-11 mt-1.5 w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+            <FaComments className="text-red-600 text-xs" />
           </div>
         );
       default:
-        return null;
+        return (
+          <div className="absolute -left-11 mt-1.5 w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
+            <FaCalendar className="text-gray-600 text-xs" />
+          </div>
+        );
     }
   };
   
@@ -101,7 +133,32 @@ export default function HistoryPage() {
     <div className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-2xl font-bold mb-6">История активности</h2>
       
-      
+      {/* Фильтры */}
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <select
+          className="block w-full md:w-auto p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          value={typeFilter}
+          onChange={handleTypeFilterChange}
+        >
+          <option value="">Все типы</option>
+          <option value="order">Заказы</option>
+          <option value="transport">Перевозки</option>
+          <option value="response">Отклики</option>
+          <option value="message">Сообщения</option>
+          <option value="chat">Чаты</option>
+        </select>
+
+        <select
+          className="block w-full md:w-auto p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          value={timeFilter}
+          onChange={handleTimeFilterChange}
+        >
+          <option value="">За все время</option>
+          <option value="week">За неделю</option>
+          <option value="month">За месяц</option>
+          <option value="year">За год</option>
+        </select>
+      </div>
       
       {/* Временная шкала */}
       <div className="relative border-l border-gray-200 ml-3 pl-8 space-y-10">
@@ -135,9 +192,16 @@ export default function HistoryPage() {
                       </div>
                     )}
                     {activity.details.description && (
-                      <div className="flex items-center">
-                        <FaMapMarkerAlt className="text-gray-400 mr-2" />
+                      <div className="flex items-center col-span-full">
+                        <FaCalendar className="text-gray-400 mr-2" />
                         <span className="text-sm">{activity.details.description}</span>
+                      </div>
+                    )}
+                    {activity.details.status && (
+                      <div className="flex items-center justify-end col-span-full">
+                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                          {statusMap[activity.details.status] || activity.details.status}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -146,7 +210,7 @@ export default function HistoryPage() {
                     <span className="text-sm">{activity.details.description}</span>
                     {activity.details.status && (
                       <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                        {activity.details.status}
+                        {statusMap[activity.details.status] || activity.details.status}
                       </span>
                     )}
                   </div>

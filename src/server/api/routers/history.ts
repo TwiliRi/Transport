@@ -2,6 +2,27 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import type { Order, Transport, Response,  OrderStatus, ActivityType, Chat  } from "~/types";
 
+// Функция для перевода типа транспорта на русский
+function getVehicleTypeLabel(vehicleType: string): string {
+  const transportTypes = [
+    { value: 'truck', label: 'Грузовик' },
+    { value: 'truck_with_trailer', label: 'Фура' },
+    { value: 'car', label: 'Легковой автомобиль' },
+    { value: 'van', label: 'Микроавтобус' },
+    { value: 'refrigerator', label: 'Рефрижератор' },
+    { value: 'tanker', label: 'Автоцистерна' },
+    { value: 'container', label: 'Контейнеровоз' },
+    { value: 'tow_truck', label: 'Эвакуатор' },
+    { value: 'dump_truck', label: 'Самосвал' },
+    { value: 'flatbed', label: 'Платформа' },
+    { value: 'crane', label: 'Кран' },
+    { value: 'any', label: 'Любой тип' }
+  ];
+  
+  const found = transportTypes.find(type => type.value === vehicleType);
+  return found ? found.label : vehicleType;
+}
+
 interface ActivityItem {
   id: string;
   type: 'order' | 'transport' | 'response' | 'message' | 'chat';
@@ -23,9 +44,6 @@ interface ActivityItem {
   };
   createdAt: Date;
 }
-
-// Добавляем импорт типа Chat
-
 
 export const historyRouter = createTRPCRouter({
   getUserActivity: protectedProcedure
@@ -59,13 +77,13 @@ export const historyRouter = createTRPCRouter({
           title: `Заказ #${order.number} ${order.status === 'active' ? 'создан' : order.status === 'completed' ? 'завершен' : 'отменен'}`,
           details: {
             route: {
-              from: order.route.from,
-              to: order.route.to
+              from: order.routeFrom,
+              to: order.routeTo
             },
             price: order.price,
             cargo: {
-              type: order.cargo.type,
-              weight: order.cargo.weight
+              type: getVehicleTypeLabel(order.cargoType),
+              weight: order.cargoWeight
             },
             status: order.status
           },
@@ -94,7 +112,7 @@ export const historyRouter = createTRPCRouter({
           }),
           title: `Транспорт "${transport.title}" ${transport.status === 'active' ? 'добавлен' : 'деактивирован'}`,
           details: {
-            description: `${transport.vehicleType}, грузоподъемность: ${transport.carryingCapacity} кг`,
+            description: `${getVehicleTypeLabel(transport.vehicleType)}, грузоподъемность: ${transport.carryingCapacity} кг`,
             status: transport.status || 'active'
           },
           createdAt: transport.createdAt || new Date()
@@ -103,11 +121,22 @@ export const historyRouter = createTRPCRouter({
 
       // Получаем отклики пользователя
       const responses = await ctx.db.response.findMany({
-        where: { carrierId: userId },
-        include: {
-          order: true
+        where: {
+          carrierId: ctx.session.user.id,
         },
-        orderBy: { createdAt: 'desc' },
+        include: {
+          order: {
+            select: {
+              id: true,
+              number: true,
+              routeFrom: true,
+              routeTo: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
       });
 
       responses.forEach((response: any) => {
@@ -123,11 +152,11 @@ export const historyRouter = createTRPCRouter({
             hour: '2-digit',
             minute: '2-digit'
           }),
-          title: `Отклик на заказ #${response.orderNumber || 'N/A'} ${response.status === 'pending' ? 'отправлен' : response.status === 'accepted' ? 'принят' : 'отклонен'}`,
+          title: `Отклик на заказ #${response.order?.number || 'N/A'} ${response.status === 'pending' ? 'отправлен' : response.status === 'accepted' ? 'принят' : 'отклонен'}`,
           details: {
-            route: response.orderRoute ? {
-              from: response.orderRoute.from,
-              to: response.orderRoute.to
+            route: response.order ? {
+              from: response.order.routeFrom,
+              to: response.order.routeTo
             } : undefined,
             status: response.status
           },
@@ -169,7 +198,7 @@ export const historyRouter = createTRPCRouter({
           }),
           title: `Начат чат по транспорту "${chat.transport.title}" с ${otherUser.name}`,
           details: {
-            description: `Обсуждение транспорта: ${chat.transport.vehicleType}`,
+            description: `Обсуждение транспорта: ${getVehicleTypeLabel(chat.transport.vehicleType)}`,
             status: 'active'
           },
           createdAt: chat.createdAt

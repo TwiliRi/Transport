@@ -11,6 +11,7 @@ export const userRouter = createTRPCRouter({
         email: true,
         phone: true,
         userType: true,
+        createdAt: true,
       },
     });
     
@@ -72,5 +73,68 @@ export const userRouter = createTRPCRouter({
       }
 
       return user;
+    }),
+
+  // Добавляем метод для получения публичных заказов пользователя
+  getPublicOrders: publicProcedure
+    .input(z.object({
+      userId: z.string(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const orders = await ctx.db.order.findMany({
+        where: { 
+          userId: input.userId,
+          status: 'active' // Показываем только активные заказы
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        take: 10, // Ограничиваем количество
+        select: {
+          id: true,
+          number: true,
+          status: true,
+          routeFrom: true,
+          routeTo: true,
+          cargoType: true,
+          cargoWeight: true,
+          price: true,
+          date: true,
+          createdAt: true,
+        },
+      });
+
+      return orders;
+    }),
+
+  // Добавляем метод для получения публичного транспорта пользователя
+  getPublicTransports: publicProcedure
+    .input(z.object({
+      userId: z.string(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const transports = await ctx.db.transport.findMany({
+        where: { 
+          userId: input.userId,
+          status: 'active' // Показываем только активный транспорт
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        take: 10, // Ограничиваем количество
+        select: {
+          id: true,
+          title: true,
+          vehicleType: true,
+          carryingCapacity: true,
+          city: true,
+          price: true,
+          workPeriod: true,
+          createdAt: true,
+          imageUrl: true,
+        },
+      });
+
+      return transports;
     }),
 });

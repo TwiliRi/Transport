@@ -33,8 +33,10 @@ export default async function Profile() {
     select: {
       phone: true,
       userType: true,
+      createdAt: true, // Добавляем дату регистрации
     },
   });
+  
   
   // Получаем последние 3 заказа пользователя
   const recentOrders = await db.order.findMany({ 
@@ -125,12 +127,12 @@ const formattedOrders: Order[] = recentOrders.map((order: any) => ({
                     )}
                   </p>
                 </div>
-                <div>
-                  <p className="text-gray-500 text-sm mb-1">Дата регистрации</p>
-                  <p className="font-medium">
-                  &ldquo;Не указано&ldquo;
-                  </p>
-                </div>
+                            <div>
+              <p className="text-gray-500 text-sm mb-1">Дата регистрации</p>
+              <p className="font-medium">
+                {userData?.createdAt ? new Date(userData.createdAt).toLocaleDateString('ru-RU') : "Не указано"}
+              </p>
+            </div>
               </div>
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <Link href="/profile/edit">
