@@ -78,10 +78,7 @@ export const metadata: Metadata = {
     // yandex: "your-yandex-verification-code",
   },
   category: "transportation",
-  icons: [
-    { rel: "icon", url: "/favicon.ico" },
-    { rel: "apple-touch-icon", url: "/ico.png" },
-  ],
+  
 };
 
 const geist = Geist({
