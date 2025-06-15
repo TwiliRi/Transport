@@ -91,7 +91,7 @@ export const authConfig = {
     signIn: '/signin',
     error: '/auth/error',
     verifyRequest: '/auth/verify-request',
-    newUser: '/auth/new-user'
+    newUser: '/profile'
   },
   callbacks: {
     session: ({ session, token }) => ({
